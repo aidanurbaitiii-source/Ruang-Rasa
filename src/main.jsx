@@ -6,7 +6,8 @@ import logoArch from './assets/logo/logo-arch.svg'
 import logoScene from './assets/logo/logo-scene.svg'
 import { printables, printableById, pageCount, PrintSheets } from './printables.jsx'
 import { activities, activityBySlug } from './activities.js'
-import MontessoriPage, { Ref } from './MontessoriPage.jsx'
+import MontessoriPage, { Ref, SourceList } from './MontessoriPage.jsx'
+import { references } from './references.js'
 import { stages, stageBySlug, stageIncludes, stageForAge } from './stages.js'
 import PlaydatePage from './PlaydatePage.jsx'
 import './styles.css'
@@ -57,7 +58,11 @@ function useRoute() {
 
 function ActivityPage({ activity, saved, onToggle }) {
   const sheets = activity.printables.map((id) => printableById[id]).filter(Boolean)
-  const others = activities.filter((item) => item.category === activity.category && item.slug !== activity.slug).slice(0, 3)
+  const stage = stageForAge(activity.age)
+  const sameCategory = activities.filter((item) => item.category === activity.category && item.slug !== activity.slug)
+  // Utamakan ide pada rentang usia yang sama (kategori yang sama lebih dulu), baru kategori yang sama di rentang usia lain.
+  const sameStage = stage ? activities.filter((item) => item.slug !== activity.slug && stageIncludes(stage, item.age)).sort((a, b) => Number(b.category === activity.category) - Number(a.category === activity.category)) : sameCategory
+  const others = (sameStage.length > 0 ? sameStage : sameCategory).slice(0, 3)
   const isSaved = saved.includes(activity.title)
   const { photo } = activity
   return <main className="subpage activity-page section-wrap">
@@ -81,8 +86,12 @@ function ActivityPage({ activity, saved, onToggle }) {
         {sheets.length > 0 && <div className="side-card"><h3>Lembar pendukung</h3><ul className="side-links">{sheets.map((sheet) => <li key={sheet.id}><a href={`#/cetak/${sheet.id}`}><Printer size={13}/> {sheet.title}</a></li>)}</ul></div>}
       </aside>
     </div>
-    <p className="source-note">{activity.source ? <>Ide ini terinspirasi dari buku <em>{activity.source.title}</em> oleh {activity.source.authors}, penerbit {activity.source.publisher}. Langkah dan penjelasan ditulis ulang oleh tim Ruang Rasa dan disesuaikan untuk anak usia 2–5 tahun.</> : <>Ide ini disusun tim Ruang Rasa sebagai ringkasan praktik Montessori yang umum dipakai di rumah. Sesuaikan dengan kesiapan dan minat anakmu.</>}</p>
-    {others.length > 0 && <><div className="section-heading section-gap"><div><h2>Ide lain di {activity.category}</h2></div></div><div className="activity-grid">{others.map((item, index) => <ActivityCard key={item.slug} activity={item} index={index} saved={saved} onToggle={onToggle} />)}</div></>}
+    {activity.refs && <section className="activity-refs"><h2>Referensi</h2>
+      <ol className="mt-sources">{activity.refs.map((key) => { const item = references[key]; return item ? <li key={key}><div className="src-body"><span className="src-cite">{item.org}{item.year ? ` (${item.year})` : ''}. <a href={item.url} target="_blank" rel="noreferrer noopener"><em>{item.title}</em></a>{item.venue ? <>. {item.venue}</> : null}.</span><span className="src-meta">{item.type} · {new URL(item.url).hostname.replace(/^www\./, '')} · Diakses Oktober 2026</span></div></li> : null })}</ol>
+      {activity.evidence && <p className="evidence-note"><strong>Catatan bukti.</strong> {activity.evidence}</p>}
+    </section>}
+    <p className="source-note">{activity.source ? <>Ide ini terinspirasi dari buku <em>{activity.source.title}</em> oleh {activity.source.authors}, penerbit {activity.source.publisher}. Langkah dan penjelasan ditulis ulang oleh tim Ruang Rasa dan disesuaikan untuk anak usia 2–5 tahun.</> : <>{activity.refs ? 'Ide ini disusun tim Ruang Rasa berdasarkan referensi di atas. Sesuaikan dengan kesiapan, minat, dan kondisi anakmu.' : 'Ide ini disusun tim Ruang Rasa sebagai ringkasan praktik Montessori yang umum dipakai di rumah. Sesuaikan dengan kesiapan dan minat anakmu.'}</>}</p>
+    {others.length > 0 && <><div className="section-heading section-gap"><div><h2>{others.every((item) => item.category === activity.category) ? `Ide lain di ${activity.category}` : `Ide lain untuk usia ${stage ? stage.age : 'ini'}`}</h2></div></div><div className="activity-grid">{others.map((item, index) => <ActivityCard key={item.slug} activity={item} index={index} saved={saved} onToggle={onToggle} />)}</div></>}
   </main>
 }
 
@@ -118,6 +127,7 @@ function AgePage({ stage, saved, onToggle }) {
           <div className="section-heading section-gap"><div><h2>{category}</h2></div><a className="text-link" href={`#/kategori/${slugify(category)}`}>Halaman kategori <ArrowRight size={14}/></a></div>
           <div className="activity-grid">{list.map((activity, index) => <ActivityCard key={activity.slug} activity={activity} index={index} saved={saved} onToggle={onToggle} />)}</div>
         </section>)}
+    <section><h2>Sumber</h2><SourceList ids={stage.refs} /></section>
   </main>
 }
 

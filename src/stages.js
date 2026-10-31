@@ -19,16 +19,16 @@ export const stages = [
   {
     slug: '12-18-tahun', range: [12, 18], age: '12–18 tahun', name: 'Masa remaja',
     note: 'Tahap perubahan besar menuju kedewasaan.',
-    intro: 'Tahap ini digambarkan sebagai masa perubahan yang pesat menuju kedewasaan.',
-    traits: ['Masa perubahan yang pesat'],
-    refs: [4],
+    intro: 'Tahap ini digambarkan sebagai masa perubahan yang pesat menuju kedewasaan. Untuk remaja, Montessori mengusulkan Erdkinder ("anak-anak tanah"): belajar lewat kerja nyata di lahan dan komunitas, bukan hanya di dalam kelas.',
+    traits: ['Masa perubahan yang pesat', 'Belajar lewat kerja nyata dan bermakna', 'Terhubung dengan alam dan komunitas'],
+    refs: [4, 13, 16],
   },
   {
     slug: '18-24-tahun', range: [18, 24], age: '18–24 tahun', name: 'Dewasa muda',
     note: 'Tahap konsolidasi sebelum dewasa penuh.',
-    intro: 'Tahap ini digambarkan lebih stabil, sebagai masa memantapkan apa yang sudah dipelajari sebelum dewasa penuh.',
-    traits: ['Masa memantapkan apa yang sudah dipelajari'],
-    refs: [4],
+    intro: 'Tahap ini digambarkan sebagai masa memantapkan identitas dan mencari kontribusi yang bermakna bagi masyarakat. Montessori sendiri menulis relatif sedikit tentang tahap ini, sehingga banyak penjelasannya berasal dari tafsir pendidik Montessori sesudahnya.',
+    traits: ['Memantapkan identitas', 'Mencari kontribusi bermakna bagi masyarakat', 'Belajar mandiri dan berpikir kritis'],
+    refs: [14, 15],
   },
 ]
 
@@ -42,7 +42,8 @@ export function parseAgeRange(text) {
 
 export function stageIncludes(stage, ageText) {
   const range = parseAgeRange(ageText)
-  return Boolean(range) && range[0] <= stage.range[1] && range[1] >= stage.range[0]
+  // Batas dianggap setengah terbuka: aktivitas 12–18 tahun tidak ikut masuk ke tahap 6–12 atau 18–24.
+  return Boolean(range) && range[0] < stage.range[1] && range[1] > stage.range[0]
 }
 
 export const stageForAge = (ageText) => stages.find((stage) => stageIncludes(stage, ageText))

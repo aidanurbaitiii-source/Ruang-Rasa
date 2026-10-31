@@ -67,3 +67,6 @@
 .age-filters{margin:28px 0 20px}.empty-state{margin-top:40px;background:#efeee5;border-radius:10px;padding:30px 30px 32px;max-width:640px}.empty-state strong{display:block;font-family:'DM Serif Display',serif;font-weight:400;font-size:22px;margin-bottom:8px}.empty-state p{font-size:13px;line-height:1.8;color:#6e6559;margin:0 0 20px}.empty-state .button-primary{display:inline-flex}
 @media(max-width:850px){.mt-summary{grid-template-columns:1fr}.mt-areas>:last-child:nth-child(odd){grid-column:1/-1}}
 @media(max-width:600px){.mt-sources li{grid-template-columns:1fr;padding:14px}.mt-sources li::before{display:none}.src-body{grid-column:1}.mt-ref a[data-tip]:hover::after{display:none}}
+
+.activity-refs{margin-top:48px}.activity-refs h2{font-family:'DM Serif Display',serif;font-weight:400;font-size:26px;margin:0 0 16px}.evidence-note{margin:14px 0 0;background:#fbf3e3;border:1px solid #efdcb4;border-radius:8px;padding:14px 18px;font-size:12px;line-height:1.8;color:#6e6559;max-width:760px}.evidence-note strong{color:var(--ink)}
+.mt-sources li:has(.src-body:only-child){grid-template-columns:34px 1fr}

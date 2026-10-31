@@ -51,8 +51,14 @@ export const sources = [
   { n: 9, type: 'Jurnal ilmiah', org: 'Lillard, A. S., & Else-Quest, N.', year: 2006, title: 'Evaluating Montessori Education', venue: 'Science', url: 'https://pcl.sitehost.iu.edu/rgoldsto/courses/cogscilearning/montessorieval.pdf' },
   { n: 10, type: 'Jurnal ilmiah', org: 'Marshall, C.', year: 2017, title: 'Montessori education: a review of the evidence base', venue: 'npj Science of Learning', url: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6161506/' },
   { n: 11, type: 'Universitas', org: 'Cornell University', title: 'What the Evidence Says About Montessori Education', url: 'https://evidencebasedliving.human.cornell.edu/uncategorized/what-the-evidence-says-about-montessori-education' },
+  { n: 13, type: 'Organisasi pendidikan', org: 'Montessori Public', year: 2022, title: 'Erdkinder in public Montessori schools', url: 'https://www.montessoripublic.org/2022/05/erdkinder-in-public-montessori-schools/' },
+  { n: 14, type: 'Organisasi Montessori', org: 'Association Montessori Internationale (AMI)', title: 'Four Planes of Development: Fourth Plane', url: 'https://archives.montessori-ami.org/help/glossary/four-planes-development-fourth-plane' },
+  { n: 15, type: 'Artikel esai', org: 'Wolff, P., & Seldin, T.', year: 2019, title: 'The needs of the fourth plane of development', venue: 'Montessori Post', url: 'https://www.montessoripost.com/2019/12/01/the-needs-of-the-fourth-plane-of-development/' },
+  { n: 16, type: 'Ensiklopedia daring', org: 'Wikipedia', title: 'Erdkinder', url: 'https://en.wikipedia.org/wiki/Erdkinder' },
   { n: 12, type: 'Jurnal ilmiah', org: 'Jurnal Agapedia (Universitas Pendidikan Indonesia)', title: 'Penerapan Pendekatan Montessori dalam Pendidikan Anak Usia Dini di Indonesia: Tantangan dan Peluang', url: 'https://ejournal.upi.edu/index.php/agapedia/article/view/85925' },
 ]
+
+sources.sort((a, b) => a.n - b.n)
 
 const domainOf = (url) => new URL(url).hostname.replace(/^www\./, '')
 const sourceLabel = (id) => { const item = sources.find((entry) => entry.n === id); return item ? `${item.org}, ${item.title}` : '' }
@@ -76,6 +82,18 @@ function backToText(n) {
 }
 
 export const Ref = ({ ids }) => <sup className="mt-ref">[{ids.map((id, i) => <React.Fragment key={id}>{i > 0 && ', '}<a href={`#sumber-${id}`} data-cite={id} data-tip={sourceLabel(id)} onClick={(event) => goToSource(event, id)} aria-label={`Sumber ${id}: ${sourceLabel(id)}`}>{id}</a></React.Fragment>)}]</sup>
+
+export function SourceList({ ids }) {
+  const list = ids ? sources.filter((item) => ids.includes(item.n)) : sources
+  const [cited, setCited] = React.useState(null)
+  React.useEffect(() => { setCited(new Set([...document.querySelectorAll('[data-cite]')].map((el) => Number(el.getAttribute('data-cite'))))) }, [])
+  return <ol className="mt-sources">{list.map((item) => <li key={item.n} id={`sumber-${item.n}`}>
+    <div className="src-body">
+      <span className="src-cite">{item.org}{item.year ? ` (${item.year})` : ''}. <a href={item.url} target="_blank" rel="noreferrer noopener"><em>{item.title}</em></a>{item.venue ? <>. {item.venue}</> : null}.</span>
+      <span className="src-meta">{item.type} · {domainOf(item.url)} · Diakses Oktober 2026{cited && cited.has(item.n) ? <> · <button type="button" className="src-back" onClick={() => backToText(item.n)}>↑ Kembali ke teks</button></> : null}</span>
+    </div>
+  </li>)}</ol>
+}
 
 export default function MontessoriPage() {
   return <main className="subpage montessori-page section-wrap">
@@ -103,6 +121,7 @@ export default function MontessoriPage() {
     <section>
       <h2>Empat tahap perkembangan</h2>
       <p className="mt-lead">Montessori membagi perkembangan manusia menjadi empat tahap yang masing-masing berlangsung sekitar enam tahun.<Ref ids={[4]} /> Ruang Rasa berada di tahap pertama.</p>
+      <p className="mt-lead">Untuk tahap remaja, Montessori mengusulkan Erdkinder ("anak-anak tanah"): belajar lewat kerja nyata di lahan dan komunitas.<Ref ids={[13, 16]} /> Tahap dewasa muda digambarkan sebagai masa memantapkan identitas dan mencari kontribusi yang bermakna bagi masyarakat.<Ref ids={[14]} /> Montessori sendiri menulis relatif sedikit tentang tahap ini, sehingga banyak penjelasannya berasal dari tafsir pendidik sesudahnya.<Ref ids={[15]} /></p>
       <div className="mt-planes">{stages.map((item) => { const count = activities.filter((activity) => stageIncludes(item, activity.age)).length; return <a key={item.slug} href={`#/usia/${item.slug}`} className="mt-plane"><strong>{item.age}</strong><span className="mt-plane-name">{item.name}</span><p>{item.note}</p><span className="mt-plane-link">{count > 0 ? `${count} aktivitas` : 'Segera hadir'} <ArrowRight size={13}/></span></a> })}</div>
     </section>
 
@@ -131,12 +150,7 @@ export default function MontessoriPage() {
 
     <section>
       <h2>Sumber</h2>
-      <ol className="mt-sources">{sources.map((item) => <li key={item.n} id={`sumber-${item.n}`}>
-        <div className="src-body">
-          <span className="src-cite">{item.org}{item.year ? ` (${item.year})` : ''}. <a href={item.url} target="_blank" rel="noreferrer noopener"><em>{item.title}</em></a>{item.venue ? <>. {item.venue}</> : null}.</span>
-          <span className="src-meta">{item.type} · {domainOf(item.url)} · Diakses Oktober 2026 · <button type="button" className="src-back" onClick={() => backToText(item.n)}>↑ Kembali ke teks</button></span>
-        </div>
-      </li>)}</ol>
+      <SourceList />
       <p className="source-note">Ringkasan ini disusun tim Ruang Rasa dari sumber-sumber di atas dan terakhir ditinjau pada Oktober 2026. Untuk istilah atau kebijakan resmi, rujuklah langsung situs organisasi Montessori terkait.</p>
     </section>
   </main>

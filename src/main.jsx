@@ -1,9 +1,10 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { ArrowDown, ArrowLeft, ArrowRight, Clock3, Heart, Leaf, Sparkles, Sun, Users } from 'lucide-react'
+import { ArrowDown, ArrowLeft, ArrowRight, Printer, Clock3, Heart, Leaf, Sparkles, Sun, Users } from 'lucide-react'
 import logoHorizontal from './assets/logo/logo-horizontal.svg'
 import logoArch from './assets/logo/logo-arch.svg'
 import logoScene from './assets/logo/logo-scene.svg'
+import { printables, printableById, pageCount, PrintSheets } from './printables.jsx'
 import './styles.css'
 
 const activities = [
@@ -40,8 +41,9 @@ function ActivityCard({ activity, index, saved, onToggle }) {
 }
 
 function parseRoute(hash) {
-  const m = hash.match(/^#\/(kategori|nilai)\/([a-z0-9-]+)$/)
+  const m = hash.match(/^#\/(kategori|nilai|cetak)\/([a-z0-9-]+)$/)
   if (!m) return { page: 'home' }
+  if (m[1] === 'cetak') return printableById[m[2]] ? { page: 'cetak', id: m[2] } : { page: 'home' }
   if (m[1] === 'kategori') { const name = categories.find((c) => c !== 'Semua' && slugify(c) === m[2]); return name ? { page: 'kategori', name } : { page: 'home' } }
   return values[m[2]] ? { page: 'nilai', slug: m[2] } : { page: 'home' }
 }
@@ -52,12 +54,31 @@ function useRoute() {
   return { route: parseRoute(hash), hash }
 }
 
-function SubPage({ eyebrow, title, intro, points, pointsTitle, items, saved, onToggle }) {
+function PrintableCard({ item }) {
+  return <a className="printable-card" href={`#/cetak/${item.id}`}><span className="printable-icon">{item.icon}</span><div><h3>{item.title}</h3><p>{item.summary}</p><span className="printable-meta"><Printer size={13}/> {pageCount(item)} halaman A4 · Lihat &amp; cetak <ArrowRight size={13}/></span></div></a>
+}
+
+function PrintPage({ item }) {
+  const back = `#/kategori/${slugify(item.category)}`
+  return <main className="printpage section-wrap">
+    <div className="print-toolbar">
+      <a className="back-link" href={back}><ArrowLeft size={15}/> {item.category}</a>
+      <div className="eyebrow">LEMBAR PRINTABLE · {item.category.toUpperCase()}</div><h1>{item.title}</h1><p className="subpage-intro">{item.summary}</p>
+      <p className="print-how"><strong>Cara memakai:</strong> {item.how}</p>
+      <div className="print-actions"><button className="button-primary" onClick={() => window.print()}><Printer size={16}/> Cetak {pageCount(item)} halaman</button><span>Ukuran kertas A4. Di jendela cetak, atur skala ke 100% (jangan "fit to page") agar ukurannya pas.</span></div>
+    </div>
+    <PrintSheets item={item} />
+  </main>
+}
+
+function SubPage({ eyebrow, title, intro, points, pointsTitle, items, saved, onToggle, sheets = [] }) {
   return <main className="subpage section-wrap">
     <a className="back-link" href="#aktivitas"><ArrowLeft size={15}/> Semua aktivitas</a>
     <div className="eyebrow">{eyebrow}</div><h1>{title}</h1><p className="subpage-intro">{intro}</p>
     <div className="subpage-points"><div className="eyebrow">{pointsTitle}</div><ul>{points.map((point) => <li key={point}>{point}</li>)}</ul></div>
-    <div className="section-heading"><div><h2>Aktivitas yang cocok</h2></div><span className="activity-count">{items.length} ide untuk dicoba</span></div>
+    {sheets.length > 0 && <><div className="section-heading"><div><h2>Lembar printable</h2><p>Siap dicetak di kertas A4, lengkap dengan cara memakainya.</p></div><span className="activity-count">{sheets.length} lembar</span></div>
+    <div className="printable-grid">{sheets.map((sheet) => <PrintableCard key={sheet.id} item={sheet} />)}</div></>}
+    <div className="section-heading section-gap"><div><h2>Aktivitas yang cocok</h2></div><span className="activity-count">{items.length} ide untuk dicoba</span></div>
     <div className="activity-grid">{items.map((activity, index) => <ActivityCard key={activity.title} activity={activity} index={index} saved={saved} onToggle={onToggle} />)}</div>
   </main>
 }
@@ -98,10 +119,11 @@ function App() {
     else if (id) document.getElementById(id)?.scrollIntoView()
     else if (previousPage.current !== 'home') window.scrollTo({ top: 0, behavior: 'instant' })
     previousPage.current = route.page
-  }, [route.page, route.name, route.slug, hash])
+  }, [route.page, route.name, route.slug, route.id, hash])
 
   let page = <Home saved={saved} toggleSaved={toggleSaved} />
-  if (route.page === 'kategori') page = <SubPage eyebrow="KATEGORI" title={route.name} intro={categoryInfo[route.name].intro} pointsTitle="CATATAN KECIL" points={categoryInfo[route.name].tips} items={activities.filter((item) => item.category === route.name)} saved={saved} onToggle={toggleSaved} />
+  if (route.page === 'kategori') page = <SubPage eyebrow="KATEGORI" title={route.name} intro={categoryInfo[route.name].intro} pointsTitle="CATATAN KECIL" points={categoryInfo[route.name].tips} items={activities.filter((item) => item.category === route.name)} sheets={printables.filter((item) => item.category === route.name)} saved={saved} onToggle={toggleSaved} />
+  if (route.page === 'cetak') page = <PrintPage item={printableById[route.id]} />
   if (route.page === 'nilai') { const value = values[route.slug]; page = <SubPage eyebrow="PRINSIP KAMI" title={value.title} intro={value.intro} pointsTitle="CARA MEMULAINYA" points={value.points} items={value.related.map((title) => activities.find((item) => item.title === title))} saved={saved} onToggle={toggleSaved} /> }
 
   return <>

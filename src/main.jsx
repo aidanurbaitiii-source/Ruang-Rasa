@@ -6,6 +6,7 @@ import logoArch from './assets/logo/logo-arch.svg'
 import logoScene from './assets/logo/logo-scene.svg'
 import { printables, printableById, pageCount, PrintSheets } from './printables.jsx'
 import { activities, activityBySlug } from './activities.js'
+import MontessoriPage from './MontessoriPage.jsx'
 import './styles.css'
 
 const categories = ['Semua', ...new Set(activities.map((item) => item.category))]
@@ -32,6 +33,7 @@ function ActivityCard({ activity, index, saved, onToggle }) {
 }
 
 function parseRoute(hash) {
+  if (hash === '#/montessori') return { page: 'montessori' }
   if (hash === '#/semua') return { page: 'semua' }
   const m = hash.match(/^#\/(kategori|nilai|cetak|aktivitas)\/([a-z0-9-]+)$/)
   if (!m) return { page: 'home' }
@@ -122,7 +124,7 @@ function SubPage({ eyebrow, title, intro, points, pointsTitle, items, saved, onT
 
 function Home({ saved, toggleSaved }) {
   return <main>
-      <section className="hero" id="beranda"><div className="hero-copy"><div className="eyebrow"><span className="eyebrow-dot"/> RUANG KECIL UNTUK BERTUMBUH</div><h1>Belajar paling baik,<br/>dimulai dari <em>rumah.</em></h1><p className="hero-text">Ide aktivitas sederhana yang membantu si kecil mengenal dunia—satu kegiatan kecil, satu hari yang penuh rasa.</p><div className="hero-actions"><a className="button-primary" href="#aktivitas">Jelajahi aktivitas <ArrowRight size={17}/></a><a className="text-link" href="#filosofi">Apa itu Montessori? <ArrowDown size={15}/></a></div><div className="hero-note"><span className="avatars"><i>🌼</i><i>🍊</i><i>🌱</i></span><span>Dibuat untuk tumbuh bersama,<br/><strong>tanpa harus sempurna.</strong></span></div></div>
+      <section className="hero" id="beranda"><div className="hero-copy"><div className="eyebrow"><span className="eyebrow-dot"/> RUANG KECIL UNTUK BERTUMBUH</div><h1>Belajar paling baik,<br/>dimulai dari <em>rumah.</em></h1><p className="hero-text">Ide aktivitas sederhana yang membantu si kecil mengenal dunia—satu kegiatan kecil, satu hari yang penuh rasa.</p><div className="hero-actions"><a className="button-primary" href="#aktivitas">Jelajahi aktivitas <ArrowRight size={17}/></a><a className="text-link" href="#/montessori">Apa itu Montessori? <ArrowRight size={15}/></a></div><div className="hero-note"><span className="avatars"><i>🌼</i><i>🍊</i><i>🌱</i></span><span>Dibuat untuk tumbuh bersama,<br/><strong>tanpa harus sempurna.</strong></span></div></div>
         <div className="hero-art"><div className="art-frame"><div className="art-blob"/><img className="hero-mark" src={logoArch} alt="Anak kecil dan rusa di bawah lengkung daun" width="230" height="210" /><div className="art-caption">sederhana · bermakna · bersama</div></div><span className="sparkle sparkle-one">✳</span><span className="sparkle sparkle-two">✳</span><span className="art-flower">✿</span></div>
       </section>
 
@@ -134,7 +136,7 @@ function Home({ saved, toggleSaved }) {
         <div className="see-all"><a className="button-primary" href="#/semua">Lihat semua {activities.length} ide <ArrowRight size={16}/></a></div>
       </section>
 
-      <section className="philosophy" id="filosofi"><div className="philosophy-inner"><div className="philosophy-art"><div className="quote-mark">“</div><img className="deer-logo" src={logoScene} alt="Anak kecil memberi daun kepada seekor rusa" /><div className="leaf-doodle">✿</div><span className="philosophy-sticker">belajar<br/>dengan hati</span></div><div className="philosophy-copy"><div className="eyebrow">SEBUAH CARA PANDANG</div><h2>Anak bukan wadah kosong.<br/>Mereka <em>penjelajah kecil.</em></h2><p>Montessori adalah pendekatan belajar yang menghormati rasa ingin tahu dan kemandirian anak. Kita menyiapkan lingkungan, memberi ruang untuk mencoba, lalu hadir untuk menemani.</p><p className="philosophy-note">Tak perlu alat khusus atau jadwal yang kaku. Benda sehari-hari dan waktu bersama sudah cukup untuk memulai.</p><a className="text-link" href="#aktivitas">Temukan kegiatan pertama <ArrowRight size={15}/></a></div></div></section>
+      <section className="philosophy" id="filosofi"><div className="philosophy-inner"><div className="philosophy-art"><div className="quote-mark">“</div><img className="deer-logo" src={logoScene} alt="Anak kecil memberi daun kepada seekor rusa" /><div className="leaf-doodle">✿</div><span className="philosophy-sticker">belajar<br/>dengan hati</span></div><div className="philosophy-copy"><div className="eyebrow">SEBUAH CARA PANDANG</div><h2>Anak bukan wadah kosong.<br/>Mereka <em>penjelajah kecil.</em></h2><p>Montessori adalah pendekatan belajar yang menghormati rasa ingin tahu dan kemandirian anak. Kita menyiapkan lingkungan, memberi ruang untuk mencoba, lalu hadir untuk menemani.</p><p className="philosophy-note">Tak perlu alat khusus atau jadwal yang kaku. Benda sehari-hari dan waktu bersama sudah cukup untuk memulai.</p><div className="philosophy-links"><a className="text-link" href="#/montessori">Pelajari tentang Montessori <ArrowRight size={15}/></a><a className="text-link" href="#aktivitas">Temukan kegiatan pertama <ArrowRight size={15}/></a></div></div></div></section>
 
       <section className="printable section-wrap" id="printable"><div className="printable-copy"><div className="eyebrow">UNTUK DICETAK, UNTUK DICOBA</div><h2>Rencana kecil untuk<br/><em>hari yang penuh rasa.</em></h2><p>Pratinjau lembar ide aktivitas sederhana. Simpan halaman ini sebagai PDF dari browser, atau cetak langsung.</p><button className="button-primary print-button" onClick={() => window.print()}>Cetak pratinjau <ArrowRight size={17}/></button></div><div className="paper-wrap"><div className="paper"><div className="paper-top"><div className="paper-logo"><img className="deer-logo" src={logoScene} alt="" /></div><span>RUANG RASA <i>·</i> LEMBAR KEGIATAN</span></div><div className="paper-title">Hari ini, kita mencoba…</div><div className="paper-activity"><div className="paper-num">01</div><div><strong>Memindahkan kacang</strong><small>Pindahkan dengan sendok, pelan-pelan.</small></div><span className="check-box"/></div><div className="paper-activity"><div className="paper-num">02</div><div><strong>Mencuci daun</strong><small>Rasakan tekstur dan percikan air.</small></div><span className="check-box"/></div><div className="paper-activity"><div className="paper-num">03</div><div><strong>Waktu membaca bersama</strong><small>Ikuti cerita ke mana pun arahnya.</small></div><span className="check-box"/></div><div className="paper-reflect"><span>Setelah mencoba, aku merasa…</span><div className="writing-line"/><div className="writing-line"/></div><div className="paper-footer"><span>Tak harus sempurna. Cukup hadir bersama.</span><span>ruang rasa <i>✿</i></span></div></div><div className="paper-deco">✳</div></div></section>
 
@@ -161,6 +163,7 @@ function App() {
 
   let page = <Home saved={saved} toggleSaved={toggleSaved} />
   if (route.page === 'kategori') page = <SubPage eyebrow="KATEGORI" title={route.name} intro={categoryInfo[route.name].intro} pointsTitle="CATATAN KECIL" points={categoryInfo[route.name].tips} items={activities.filter((item) => item.category === route.name)} sheets={printables.filter((item) => item.category === route.name)} saved={saved} onToggle={toggleSaved} />
+  if (route.page === 'montessori') page = <MontessoriPage />
   if (route.page === 'semua') page = <AllPage saved={saved} onToggle={toggleSaved} />
   if (route.page === 'aktivitas') page = <ActivityPage activity={activityBySlug[route.slug]} saved={saved} onToggle={toggleSaved} />
   if (route.page === 'cetak') page = <PrintPage item={printableById[route.id]} />
@@ -168,7 +171,7 @@ function App() {
 
   return <>
     <header className="site-header"><a className="brand" href="#beranda"><img className="brand-logo" src={logoHorizontal} alt="Ruang Rasa" width="150" height="47" /></a>
-      <nav><a href="#aktivitas">Aktivitas</a><a href="#filosofi">Tentang Montessori</a><a href="#printable">Printable</a></nav><a className="header-cta" href="#aktivitas">Temukan ide <ArrowRight size={15}/></a>
+      <nav><a href="#aktivitas">Aktivitas</a><a href="#/montessori">Tentang Montessori</a><a href="#printable">Printable</a></nav><a className="header-cta" href="#aktivitas">Temukan ide <ArrowRight size={15}/></a>
     </header>
 
     {page}

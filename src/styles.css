@@ -40,3 +40,16 @@
 
 .see-all{display:flex;justify-content:center;margin-top:30px}.see-all .button-primary{padding:14px 22px;font-size:12px}
 .activity-chips span em{font-style:normal}.source-note em{font-style:italic}
+
+.philosophy-links{display:flex;gap:26px;flex-wrap:wrap;margin-top:7px}.philosophy-links .text-link{margin-top:0}
+.mt-ref{font-size:9px;font-weight:600;margin-left:2px;line-height:0}.mt-ref a{color:var(--green);padding:0 1px}.mt-ref a:hover{text-decoration:underline}
+.montessori-page section{margin-top:62px}.montessori-page h2{font-family:'DM Serif Display',serif;font-weight:400;font-size:30px;margin:0 0 18px}
+.mt-lead{font-size:13px;line-height:1.85;color:#6e6559;max-width:640px;margin:0 0 22px}
+.mt-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:34px}.mt-summary>div{background:#efeee5;border-radius:8px;padding:18px 20px}.mt-summary strong{display:block;font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:#8b806f;margin-bottom:9px}.mt-summary span{font-size:12px;line-height:1.8;color:#6e6559}
+.mt-timeline{list-style:none;margin:0;padding:0;position:relative}.mt-timeline::before{content:'';position:absolute;left:34px;top:8px;bottom:8px;width:1px;background:#d9d4c2}.mt-timeline li{display:grid;grid-template-columns:70px 1fr;gap:20px;padding:0 0 22px;position:relative}.mt-year{font-family:'DM Serif Display',serif;font-size:20px;color:var(--green);background:var(--cream);position:relative;z-index:1;padding-right:8px}.mt-timeline p{margin:3px 0 0;font-size:13px;line-height:1.8;color:#5f564b;max-width:600px}
+.mt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.mt-grid.two{grid-template-columns:repeat(2,1fr)}.mt-grid .side-card h3{font-size:11px;letter-spacing:.6px;text-transform:none;color:var(--ink);font-weight:700;margin-bottom:9px}.mt-grid .side-card p{font-size:12px}
+.mt-planes{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.mt-plane{background:#fffdf9;border:1px solid #eee9df;border-radius:8px;padding:18px}.mt-plane strong{display:block;font-family:'DM Serif Display',serif;font-weight:400;font-size:22px;color:var(--green)}.mt-plane-name{display:block;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#8b806f;margin:3px 0 10px}.mt-plane p{margin:0;font-size:12px;line-height:1.75;color:#6e6559}
+.mt-areas{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.mt-area{background:#fffdf9;border:1px solid #eee9df;border-radius:8px;padding:18px 20px}.mt-area h3{font-family:'DM Serif Display',serif;font-weight:400;font-size:20px;margin:0 0 8px}.mt-area p{margin:0 0 12px;font-size:12px;line-height:1.8;color:#6e6559}.mt-soon{font-size:10px;color:#a09681;font-weight:600}
+.mt-sources{margin:0;padding-left:22px;font-size:12px;line-height:1.9;color:#6e6559}.mt-sources a{color:var(--green);text-decoration:underline;text-underline-offset:3px;word-break:break-word}.mt-sources li{padding-left:4px}.mt-sources li{transition:background .4s}.mt-sources li.mt-flash{background:#efeee5;border-radius:4px}
+@media(max-width:850px){.mt-summary,.mt-grid,.mt-planes{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.mt-summary,.mt-grid,.mt-grid.two,.mt-planes,.mt-areas{grid-template-columns:1fr}.mt-timeline li{grid-template-columns:56px 1fr;gap:14px}.mt-timeline::before{left:26px}.montessori-page section{margin-top:46px}}

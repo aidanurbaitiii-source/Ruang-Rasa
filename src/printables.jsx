@@ -12,6 +12,21 @@ const PALETTE = ['#d9544d', '#f2a33a', '#f2c230', '#6fa86b', '#3b7dd8', '#8e6bb8
 const chunk = (list, size) => Array.from({ length: Math.ceil(list.length / size) }, (_, i) => list.slice(i * size, i * size + size))
 const num = (n) => Number(n.toFixed(2))
 
+// Foto asli: taruh file di src/foto/<kata>.jpg (huruf kecil, spasi jadi "-", mis. "es-krim.jpg", "kura-kura.jpg").
+// Jika fotonya ada, kartu memakainya; jika belum, kartu tetap memakai emoji.
+const FOTO = import.meta.glob('./foto/*.{jpg,jpeg,png,webp}', { eager: true, query: '?url', import: 'default' })
+const fotoUrl = (word) => {
+  const slug = word.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  const key = Object.keys(FOTO).find((k) => k.replace(/^\.\/foto\//, '').replace(/\.[a-z]+$/, '') === slug)
+  return key ? FOTO[key] : null
+}
+// Gambar kartu: foto bila ada (dipotong rapi di dalam kotak), emoji bila tidak.
+function Pic({ word, emoji, x, y, w, h, className = 's-emoji-l' }) {
+  const url = fotoUrl(word)
+  if (url) return <svg x={x} y={y} width={w} height={h}><image href={url} x="0" y="0" width={w} height={h} preserveAspectRatio="xMidYMid slice" /></svg>
+  return <text x={x + w / 2} y={y + h / 2} className={className} textAnchor="middle" dominantBaseline="central">{emoji}</text>
+}
+
 const wrap = (line, max = 92) => line.split(' ').reduce((rows, word) => { const last = rows[rows.length - 1]; if (last !== undefined && (last + ' ' + word).length <= max) rows[rows.length - 1] = last + ' ' + word; else rows.push(word); return rows }, [])
 
 function Lines({ x, y, lh = 5.2, lines, className = 's-text', anchor }) {
@@ -347,7 +362,7 @@ function kartuHuruf() {
       const x = 12 + (i % 2) * 98, y = 50 + Math.floor(i / 2) * 58
       return <CutCard key={w} x={x} y={y} w={88} h={52}>
         <text x={x + 8} y={y + 33} className="s-letter" fill={OLIVE}>{l}<tspan fill={TERRA}>{l.toLowerCase()}</tspan></text>
-        {typeof e === 'function' ? e(x + 65, y + 28) : <text x={x + 65} y={y + 28} className="s-emoji" textAnchor="middle" dominantBaseline="central">{e}</text>}
+        {typeof e === 'function' && !fotoUrl(w) ? e(x + 65, y + 28) : <Pic word={w} emoji={e} x={x + 49} y={y + 8} w={34} h={34} className="s-emoji" />}
         <text x={x + 44} y={y + 47} className="s-word" textAnchor="middle">{w}</text>
       </CutCard>
     })}
@@ -358,8 +373,8 @@ function PictureSet({ items, name }) {
   const grid = (i) => ({ x: 12 + (i % 3) * 64, y: 48 + Math.floor(i / 3) * 56 })
   const groups = chunk(items, 12)
   const kinds = [
-    { key: 'k', title: `Kartu kontrol: ${name}`, line: 'Kartu gambar + kata. Simpan satu set ini sebagai kunci; anak mencocokkan kartu gambar dan kartu kata dengannya.', draw: ([e, w], x, y) => <><text x={x + 29} y={y + 21} className="s-emoji-l" textAnchor="middle" dominantBaseline="central">{e}</text><text x={x + 29} y={y + 45} className="s-word" textAnchor="middle">{w}</text></> },
-    { key: 'g', title: `Kartu gambar: ${name}`, line: 'Gunting kartunya. Anak menyebutkan nama gambar, lalu mencari kartu kata yang cocok.', draw: ([e], x, y) => <text x={x + 29} y={y + 27} className="s-emoji-l" textAnchor="middle" dominantBaseline="central">{e}</text> },
+    { key: 'k', title: `Kartu kontrol: ${name}`, line: 'Kartu gambar + kata. Simpan satu set ini sebagai kunci; anak mencocokkan kartu gambar dan kartu kata dengannya.', draw: ([e, w], x, y) => <><Pic word={w} emoji={e} x={x + 14} y={y + 3} w={30} h={30} /><text x={x + 29} y={y + 45} className="s-word" textAnchor="middle">{w}</text></> },
+    { key: 'g', title: `Kartu gambar: ${name}`, line: 'Gunting kartunya. Anak menyebutkan nama gambar, lalu mencari kartu kata yang cocok.', draw: ([e, w], x, y) => <Pic word={w} emoji={e} x={x + 7} y={y + 6} w={44} h={40} /> },
     { key: 'w', title: `Kartu kata: ${name}`, line: 'Gunting kartunya. Letakkan kartu kata di bawah kartu gambar yang cocok.', draw: ([, w], x, y) => <text x={x + 29} y={y + 31} className="s-word-l" textAnchor="middle">{w}</text> },
   ]
   return kinds.flatMap((kind) => groups.map((group, gi) => <Page key={`${kind.key}${gi}`} name={false} title={groups.length > 1 ? `${kind.title} (${gi + 1}/${groups.length})` : kind.title} lines={[kind.line]}>

@@ -32,6 +32,7 @@ function ActivityCard({ activity, index, saved, onToggle }) {
 }
 
 function parseRoute(hash) {
+  if (hash === '#/semua') return { page: 'semua' }
   const m = hash.match(/^#\/(kategori|nilai|cetak|aktivitas)\/([a-z0-9-]+)$/)
   if (!m) return { page: 'home' }
   if (m[1] === 'aktivitas') return activityBySlug[m[2]] ? { page: 'aktivitas', slug: m[2] } : { page: 'home' }
@@ -55,7 +56,7 @@ function ActivityPage({ activity, saved, onToggle }) {
     <a className="back-link" href={`#/kategori/${slugify(activity.category)}`}><ArrowLeft size={15}/> {activity.category}</a>
     <div className="activity-head">
       <div><div className="eyebrow">{activity.category.toUpperCase()}</div><h1>{activity.title}</h1><p className="subpage-intro">{activity.intro}</p>
-        <div className="activity-chips"><span>{activity.age}</span><span><Clock3 size={14}/> {activity.time}</span><button className={isSaved ? 'chip-button saved' : 'chip-button'} onClick={() => onToggle(activity.title)}><Heart size={14} fill={isSaved ? 'currentColor' : 'none'}/> {isSaved ? 'Tersimpan' : 'Simpan'}</button></div></div>
+        <div className="activity-chips"><span>{activity.age}</span><span><Clock3 size={14}/> {activity.time}</span>{activity.mess && <span>Berantakan: {activity.mess}</span>}<button className={isSaved ? 'chip-button saved' : 'chip-button'} onClick={() => onToggle(activity.title)}><Heart size={14} fill={isSaved ? 'currentColor' : 'none'}/> {isSaved ? 'Tersimpan' : 'Simpan'}</button></div></div>
       <div className={`card-art activity-hero ${activity.color}`}><span>{activity.icon}</span></div>
     </div>
     <div className="activity-layout">
@@ -72,8 +73,21 @@ function ActivityPage({ activity, saved, onToggle }) {
         {sheets.length > 0 && <div className="side-card"><h3>Lembar pendukung</h3><ul className="side-links">{sheets.map((sheet) => <li key={sheet.id}><a href={`#/cetak/${sheet.id}`}><Printer size={13}/> {sheet.title}</a></li>)}</ul></div>}
       </aside>
     </div>
-    <p className="source-note">Ide ini disusun tim Ruang Rasa sebagai ringkasan praktik Montessori yang umum dipakai di rumah. Sesuaikan dengan kesiapan dan minat anakmu.</p>
+    <p className="source-note">{activity.source ? <>Ide ini terinspirasi dari buku <em>{activity.source.title}</em> oleh {activity.source.authors}, penerbit {activity.source.publisher}. Langkah dan penjelasan ditulis ulang oleh tim Ruang Rasa dan disesuaikan untuk anak usia 2–5 tahun.</> : <>Ide ini disusun tim Ruang Rasa sebagai ringkasan praktik Montessori yang umum dipakai di rumah. Sesuaikan dengan kesiapan dan minat anakmu.</>}</p>
     {others.length > 0 && <><div className="section-heading section-gap"><div><h2>Ide lain di {activity.category}</h2></div></div><div className="activity-grid">{others.map((item, index) => <ActivityCard key={item.slug} activity={item} index={index} saved={saved} onToggle={onToggle} />)}</div></>}
+  </main>
+}
+
+function AllPage({ saved, onToggle }) {
+  return <main className="subpage section-wrap">
+    <a className="back-link" href="#aktivitas"><ArrowLeft size={15}/> Beranda</a>
+    <div className="eyebrow">KUMPULAN IDE</div><h1>Semua ide aktivitas</h1>
+    <p className="subpage-intro">{activities.length} ide kegiatan sederhana dengan bahan sehari-hari, dikelompokkan menurut kategori. Pilih satu, siapkan bersama, lalu nikmati prosesnya.</p>
+    <div className="filters">{categories.filter((category) => category !== 'Semua').map((category) => <a key={category} className="filter" href={`#/kategori/${slugify(category)}`}>{category} ({activities.filter((item) => item.category === category).length})</a>)}</div>
+    {categories.filter((category) => category !== 'Semua').map((category) => <section key={category}>
+      <div className="section-heading section-gap"><div><h2>{category}</h2></div><a className="text-link" href={`#/kategori/${slugify(category)}`}>Halaman kategori <ArrowRight size={14}/></a></div>
+      <div className="activity-grid">{activities.filter((item) => item.category === category).map((activity, index) => <ActivityCard key={activity.slug} activity={activity} index={index} saved={saved} onToggle={onToggle} />)}</div>
+    </section>)}
   </main>
 }
 
@@ -115,8 +129,9 @@ function Home({ saved, toggleSaved }) {
       <section className="values-strip"><a className="value-link" href="#/nilai/ikuti-ritme-anak"><span className="value-icon"><Heart size={17}/></span><span>Ikuti ritme anak</span></a><span className="value-separator">✳</span><a className="value-link" href="#/nilai/pakai-yang-ada-di-rumah"><span className="value-icon"><Leaf size={17}/></span><span>Pakai yang ada di rumah</span></a><span className="value-separator">✳</span><a className="value-link" href="#/nilai/proses-lebih-berarti"><span className="value-icon"><Sparkles size={17}/></span><span>Proses lebih berarti dari hasil</span></a></section>
 
       <section className="activities section-wrap" id="aktivitas"><div className="section-heading"><div><div className="eyebrow">IDE KECIL, MAKNA BESAR</div><h2>Mulai dari yang <em>sederhana.</em></h2><p>Pilih satu kegiatan, siapkan bersama, lalu nikmati prosesnya.</p></div><span className="activity-count">{activities.length} ide untuk dicoba <span>↘</span></span></div>
-        <div className="filters" aria-label="Kategori aktivitas"><a className="filter active" href="#aktivitas">Semua</a>{categories.map((category) => <a key={category} className="filter" href={`#/kategori/${slugify(category)}`}>{category}</a>)}</div>
-        <div className="activity-grid">{activities.map((activity, index) => <ActivityCard key={activity.title} activity={activity} index={index} saved={saved} onToggle={toggleSaved} />)}</div>
+        <div className="filters" aria-label="Kategori aktivitas"><a className="filter active" href="#/semua">Semua ({activities.length})</a>{categories.map((category) => <a key={category} className="filter" href={`#/kategori/${slugify(category)}`}>{category}</a>)}</div>
+        <div className="activity-grid">{activities.slice(0, 8).map((activity, index) => <ActivityCard key={activity.title} activity={activity} index={index} saved={saved} onToggle={toggleSaved} />)}</div>
+        <div className="see-all"><a className="button-primary" href="#/semua">Lihat semua {activities.length} ide <ArrowRight size={16}/></a></div>
       </section>
 
       <section className="philosophy" id="filosofi"><div className="philosophy-inner"><div className="philosophy-art"><div className="quote-mark">“</div><img className="deer-logo" src={logoScene} alt="Anak kecil memberi daun kepada seekor rusa" /><div className="leaf-doodle">✿</div><span className="philosophy-sticker">belajar<br/>dengan hati</span></div><div className="philosophy-copy"><div className="eyebrow">SEBUAH CARA PANDANG</div><h2>Anak bukan wadah kosong.<br/>Mereka <em>penjelajah kecil.</em></h2><p>Montessori adalah pendekatan belajar yang menghormati rasa ingin tahu dan kemandirian anak. Kita menyiapkan lingkungan, memberi ruang untuk mencoba, lalu hadir untuk menemani.</p><p className="philosophy-note">Tak perlu alat khusus atau jadwal yang kaku. Benda sehari-hari dan waktu bersama sudah cukup untuk memulai.</p><a className="text-link" href="#aktivitas">Temukan kegiatan pertama <ArrowRight size={15}/></a></div></div></section>
@@ -146,6 +161,7 @@ function App() {
 
   let page = <Home saved={saved} toggleSaved={toggleSaved} />
   if (route.page === 'kategori') page = <SubPage eyebrow="KATEGORI" title={route.name} intro={categoryInfo[route.name].intro} pointsTitle="CATATAN KECIL" points={categoryInfo[route.name].tips} items={activities.filter((item) => item.category === route.name)} sheets={printables.filter((item) => item.category === route.name)} saved={saved} onToggle={toggleSaved} />
+  if (route.page === 'semua') page = <AllPage saved={saved} onToggle={toggleSaved} />
   if (route.page === 'aktivitas') page = <ActivityPage activity={activityBySlug[route.slug]} saved={saved} onToggle={toggleSaved} />
   if (route.page === 'cetak') page = <PrintPage item={printableById[route.id]} />
   if (route.page === 'nilai') { const value = values[route.slug]; page = <SubPage eyebrow="PRINSIP KAMI" title={value.title} intro={value.intro} pointsTitle="CARA MEMULAINYA" points={value.points} items={value.related.map((title) => activities.find((item) => item.title === title))} saved={saved} onToggle={toggleSaved} /> }

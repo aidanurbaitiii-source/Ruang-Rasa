@@ -40,6 +40,7 @@ function parseRoute(hash) {
   if (hash === '#/playdate') return { page: 'playdate' }
   if (hash === '#/montessori') return { page: 'montessori' }
   if (hash === '#/semua') return { page: 'semua' }
+  if (hash === '#/rencana') return { page: 'rencana' }
   const m = hash.match(/^#\/(kategori|nilai|cetak|aktivitas|usia)\/([a-z0-9-]+)$/)
   if (!m) return { page: 'home' }
   if (m[1] === 'usia') return stageBySlug[m[2]] ? { page: 'usia', slug: m[2] } : { page: 'home' }
@@ -138,14 +139,44 @@ function PrintableCard({ item }) {
   return <a className="printable-card" href={`#/cetak/${item.id}`}><span className="printable-icon">{item.icon}</span><div><h3>{item.title}</h3><p>{item.summary}</p><span className="printable-meta"><Printer size={13}/> {pageCount(item)} halaman A4 · Lihat &amp; cetak <ArrowRight size={13}/></span></div></a>
 }
 
+const isIOS = () => typeof navigator !== 'undefined' && (/iP(ad|hone|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
+
+function PrintButton({ label }) {
+  const [tried, setTried] = React.useState(false)
+  const ios = isIOS()
+  const press = () => { setTried(true); try { window.print() } catch (error) { /* ditangani oleh petunjuk di bawah */ } }
+  return <>
+    <button type="button" className="button-primary" onClick={press}><Printer size={16}/> {label}</button>
+    {(ios || tried) && <div className="print-help" role="note">
+      {ios ? <><strong>Di iPad atau iPhone:</strong> jika jendela cetak tidak muncul, ketuk ikon <b>Bagikan</b> (kotak dengan panah ke atas) di Safari, lalu pilih <b>Cetak</b>. Untuk menyimpan sebagai PDF, pilih <b>Cetak</b> lalu cubit layar pratinjau ke luar (zoom), atau pilih <b>Simpan ke Berkas</b>.</> : <><strong>Jendela cetak tidak muncul?</strong> Coba tekan Ctrl+P (atau Cmd+P di Mac), atau buka menu peramban lalu pilih Cetak.</>}
+    </div>}
+  </>
+}
+
+function PlanPrintPage({ plan }) {
+  const chosen = plan.slugs.map((slug) => activityBySlug[slug]).filter(Boolean)
+  const dateLabel = plan.date ? new Date(`${plan.date}T00:00:00`).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : ''
+  return <main className="printpage planpage section-wrap">
+    <style>{'@page{size:A4;margin:12mm}'}</style>
+    <div className="print-toolbar">
+      <a className="back-link" href="#printable"><ArrowLeft size={15}/> Ubah kegiatan</a>
+      <div className="eyebrow">PRATINJAU CETAK</div><h1>Lembar kegiatan hari ini</h1>
+      <p className="subpage-intro">Beginilah tampilan lembar di kertas A4. Periksa dulu, lalu cetak.</p>
+      <div className="print-actions"><PrintButton label="Cetak lembar ini" /></div>
+    </div>
+    {chosen.length === 0 ? <div className="empty-state"><strong>Belum ada kegiatan terpilih.</strong><a className="button-primary" href="#printable">Pilih kegiatan <ArrowRight size={16}/></a></div> : <PlanPaper plan={plan} chosen={chosen} dateLabel={dateLabel} />}
+  </main>
+}
+
 function PrintPage({ item }) {
   const back = `#/kategori/${slugify(item.category)}`
   return <main className="printpage section-wrap">
+    <style>{'@page{size:A4;margin:0}'}</style>
     <div className="print-toolbar">
       <a className="back-link" href={back}><ArrowLeft size={15}/> {item.category}</a>
       <div className="eyebrow">LEMBAR PRINTABLE · {item.category.toUpperCase()}</div><h1>{item.title}</h1><p className="subpage-intro">{item.summary}</p>
       <p className="print-how"><strong>Cara memakai:</strong> {item.how}</p>
-      <div className="print-actions"><button className="button-primary" onClick={() => window.print()}><Printer size={16}/> Cetak {pageCount(item)} halaman</button><span>Ukuran kertas A4. Di jendela cetak, atur skala ke 100% (jangan "fit to page") agar ukurannya pas.</span></div>
+      <div className="print-actions"><PrintButton label={`Cetak ${pageCount(item)} halaman`} /><span>Ukuran kertas A4. Di jendela cetak, atur skala ke 100% (jangan "fit to page") agar ukurannya pas.</span></div>
     </div>
     <PrintSheets item={item} />
   </main>
@@ -177,6 +208,17 @@ function loadPlan() {
 
 const shortMaterials = (activity) => activity.materials.slice(0, 2).map((item) => item.replace(/\s*\(.*\)/, '')).join(', ')
 
+function PlanPaper({ plan, chosen, dateLabel }) {
+  return (
+    <div className="paper-wrap"><div className="paper"><div className="paper-top"><div className="paper-logo"><img className="deer-logo" src={logoScene} alt="" /></div><span>RUANG RASA <i>·</i> LEMBAR KEGIATAN</span></div>
+      <div className="paper-meta"><span>Nama: <b>{plan.name || '____________'}</b></span><span>Tanggal: <b>{dateLabel || '____________'}</b></span></div>
+      <div className="paper-title">Hari ini, kita mencoba…</div>
+      {chosen.length === 0 ? <div className="paper-empty">Pilih kegiatan di samping, dan lembar ini akan terisi.</div> : chosen.map((item, index) => <div className="paper-activity" key={item.slug}><div className="paper-num">{String(index + 1).padStart(2, '0')}</div><div><strong>{item.title}</strong><small>{item.age} · {item.time}<br/>Siapkan: {shortMaterials(item)}</small></div><span className="check-box"/></div>)}
+      <div className="paper-reflect"><span>Setelah mencoba, aku merasa…</span><div className="writing-line"/><div className="writing-line"/></div>
+      <div className="paper-footer"><span>Tak harus sempurna. Cukup hadir bersama.</span><span>ruang rasa <i>✿</i></span></div></div><div className="paper-deco"><Spark/></div></div>
+  )
+}
+
 function Planner({ plan, setPlan, saved }) {
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState('')
@@ -203,7 +245,7 @@ function Planner({ plan, setPlan, saved }) {
       </div>
       <div className="plan-actions">
         <button type="button" className="button-primary" aria-expanded={open} onClick={() => setOpen((value) => !value)}>{open ? 'Tutup pilihan' : 'Pilih kegiatan'}</button>
-        <button type="button" className="button-primary print-button" disabled={chosen.length === 0} onClick={() => window.print()}><Printer size={16}/> Cetak rencana</button>
+        <a className={chosen.length === 0 ? 'button-primary print-button is-disabled' : 'button-primary print-button'} href="#/rencana" aria-disabled={chosen.length === 0} onClick={(event) => { if (chosen.length === 0) event.preventDefault() }}><Printer size={16}/> Lihat &amp; cetak</a>
         {favourites.length > 0 && <button type="button" className="text-link as-button" onClick={() => setPlan((current) => ({ ...current, slugs: favourites.map((item) => item.slug).slice(0, MAX_PLAN) }))}>Pakai favorit ({favourites.length})</button>}
         {chosen.length > 0 && <button type="button" className="text-link as-button" onClick={() => setPlan((current) => ({ ...current, slugs: [] }))}>Kosongkan</button>}
       </div>
@@ -214,12 +256,7 @@ function Planner({ plan, setPlan, saved }) {
         <ul className="plan-list">{list.length === 0 ? <li className="plan-empty">Tidak ada kegiatan yang cocok.</li> : list.map((item) => { const checked = plan.slugs.includes(item.slug); return <li key={item.slug}><label className={checked ? 'checked' : ''}><input type="checkbox" checked={checked} disabled={!checked && chosen.length >= MAX_PLAN} onChange={() => toggle(item.slug)} /><span className="plan-item-title"><span aria-hidden="true">{item.icon}</span> {item.title}</span><span className="plan-item-meta">{item.age} · {item.time}</span></label></li> })}</ul>
       </div>}
     </div>
-    <div className="paper-wrap"><div className="paper"><div className="paper-top"><div className="paper-logo"><img className="deer-logo" src={logoScene} alt="" /></div><span>RUANG RASA <i>·</i> LEMBAR KEGIATAN</span></div>
-      <div className="paper-meta"><span>Nama: <b>{plan.name || '____________'}</b></span><span>Tanggal: <b>{dateLabel || '____________'}</b></span></div>
-      <div className="paper-title">Hari ini, kita mencoba…</div>
-      {chosen.length === 0 ? <div className="paper-empty">Pilih kegiatan di samping, dan lembar ini akan terisi.</div> : chosen.map((item, index) => <div className="paper-activity" key={item.slug}><div className="paper-num">{String(index + 1).padStart(2, '0')}</div><div><strong>{item.title}</strong><small>{item.age} · {item.time}<br/>Siapkan: {shortMaterials(item)}</small></div><span className="check-box"/></div>)}
-      <div className="paper-reflect"><span>Setelah mencoba, aku merasa…</span><div className="writing-line"/><div className="writing-line"/></div>
-      <div className="paper-footer"><span>Tak harus sempurna. Cukup hadir bersama.</span><span>ruang rasa <i>✿</i></span></div></div><div className="paper-deco"><Spark/></div></div>
+    <PlanPaper plan={plan} chosen={chosen} dateLabel={dateLabel} />
   </section>
 }
 
@@ -282,6 +319,7 @@ function App() {
   if (route.page === 'memasak') page = <SubPage eyebrow="KOLEKSI" title="Memasak bersama anak" intro="Dapur adalah ruang belajar yang nyata: anak berhitung, menakar, mengikuti langkah, dan mencoba rasa baru. Pilih satu resep sederhana dan bagi tugas sesuai kemampuan anak." pointsTitle="SEBELUM MULAI" points={['Cuci tangan dengan sabun sebelum dan sesudah memasak, dan kenakan celemek.', 'Bagi tugas sesuai kemampuan: anak mencuci, mengaduk, menuang, dan menata. Kompor, oven, pisau tajam, dan blender hanya untuk orang dewasa.', 'Tanyakan lebih dulu soal alergi (telur, susu, gluten, kacang) pada anak yang ikut makan.', 'Madu tidak untuk anak di bawah 1 tahun.', 'Biarkan berantakan sedikit. Prosesnya lebih penting daripada hasilnya.']} items={activities.filter((item) => item.collections?.includes('memasak'))} sheets={['kartu-makanan', 'utuh-dan-potong'].map((id) => printableById[id])} saved={saved} onToggle={toggleSaved} />
   if (route.page === 'semua') page = <AllPage saved={saved} onToggle={toggleSaved} />
   if (route.page === 'aktivitas') page = <ActivityPage activity={activityBySlug[route.slug]} saved={saved} onToggle={toggleSaved} plan={plan} onTogglePlan={togglePlan} />
+  if (route.page === 'rencana') page = <PlanPrintPage plan={plan} />
   if (route.page === 'cetak') page = <PrintPage item={printableById[route.id]} />
   if (route.page === 'nilai') { const article = articleBySlug[route.slug]; page = <ArticlePage article={article}><section className="art-section"><div className="section-heading"><div><h2>Aktivitas untuk dicoba</h2><p>Ide yang sejalan dengan artikel ini.</p></div></div><div className="activity-grid">{article.related.map((slug, index) => <ActivityCard key={slug} activity={activityBySlug[slug]} index={index} saved={saved} onToggle={toggleSaved} />)}</div></section></ArticlePage> }
 

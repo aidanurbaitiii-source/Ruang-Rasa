@@ -7,6 +7,7 @@ import logoScene from './assets/logo/logo-scene.svg'
 import { printables, printableById, pageCount, PrintSheets } from './printables.jsx'
 import { activities, activityBySlug } from './activities.js'
 import MontessoriPage from './MontessoriPage.jsx'
+import PlaydatePage from './PlaydatePage.jsx'
 import './styles.css'
 
 const categories = ['Semua', ...new Set(activities.map((item) => item.category))]
@@ -17,6 +18,7 @@ const categoryInfo = {
   'Kehidupan praktis': { intro: 'Kegiatan sehari-hari yang melatih kemandirian: memindahkan, menuang, mencuci, melipat. Gerakannya sederhana, tetapi melatih koordinasi tangan, fokus, dan rasa percaya diri.', tips: ['Tunjukkan gerakannya pelan-pelan, tanpa banyak bicara.', 'Siapkan alat berukuran kecil yang pas untuk tangan anak.', 'Tumpah atau berantakan itu bagian dari belajar. Sediakan lap kecil agar anak bisa membereskannya sendiri.'] },
   'Sensorial': { intro: 'Mengasah pancaindra lewat warna, tekstur, ukuran, dan bentuk. Dari sini anak belajar membandingkan, mengelompokkan, dan memperhatikan hal-hal kecil di sekitarnya.', tips: ['Mulai dari dua pilihan saja, lalu tambah saat anak siap.', 'Beri nama sifat bendanya: halus, kasar, besar, kecil.', 'Biarkan anak menyentuh dan mengamati selama yang ia mau.'] },
   'Matematika': { intro: 'Mengenal pola, urutan, dan jumlah lewat benda nyata yang bisa disentuh dan digeser. Konsep angka terasa lebih mudah saat anak bisa memegangnya langsung.', tips: ['Pakai benda konkret seperti kancing atau potongan buah.', 'Mulai dari pola sederhana dengan dua unsur.', 'Ajukan pertanyaan terbuka: "Menurutmu, selanjutnya apa?"'] },
+  'Budaya': { intro: 'Mengenal dunia di sekitar anak: alam, hewan dan tumbuhan, bumi dan tempat tinggal, serta seni dan musik. Dari yang paling dekat dulu, lalu meluas.', tips: ['Mulai dari hal yang dekat dan nyata: halaman rumah, hewan peliharaan, cuaca hari ini.', 'Ajak anak menebak sebelum mencoba, lalu cocokkan dengan hasilnya.', 'Tidak perlu menghafal nama. Rasa ingin tahu lebih penting.'] },
   'Bahasa': { intro: 'Memperkaya kosakata lewat cerita, gambar, dan percakapan sehari-hari. Anak belajar mendengarkan, menamai, dan menceritakan dunianya dengan kata-kata sendiri.', tips: ['Ikuti kata-kata anak, jangan buru-buru mengoreksi.', 'Beri jeda agar anak sempat menjawab.', 'Pilih buku bergambar yang jelas dan tidak terlalu ramai.'] },
 }
 
@@ -33,6 +35,8 @@ function ActivityCard({ activity, index, saved, onToggle }) {
 }
 
 function parseRoute(hash) {
+  if (hash === '#/memasak') return { page: 'memasak' }
+  if (hash === '#/playdate') return { page: 'playdate' }
   if (hash === '#/montessori') return { page: 'montessori' }
   if (hash === '#/semua') return { page: 'semua' }
   const m = hash.match(/^#\/(kategori|nilai|cetak|aktivitas)\/([a-z0-9-]+)$/)
@@ -85,6 +89,7 @@ function AllPage({ saved, onToggle }) {
     <a className="back-link" href="#aktivitas"><ArrowLeft size={15}/> Beranda</a>
     <div className="eyebrow">KUMPULAN IDE</div><h1>Semua ide aktivitas</h1>
     <p className="subpage-intro">{activities.length} ide kegiatan sederhana dengan bahan sehari-hari, dikelompokkan menurut kategori. Pilih satu, siapkan bersama, lalu nikmati prosesnya.</p>
+    <div className="filters collections"><span className="filters-label">Koleksi</span><a className="filter" href="#/memasak">Memasak bersama anak ({activities.filter((item) => item.collections?.includes('memasak')).length})</a><a className="filter" href="#/playdate">Panduan playdate</a></div>
     <div className="filters">{categories.filter((category) => category !== 'Semua').map((category) => <a key={category} className="filter" href={`#/kategori/${slugify(category)}`}>{category} ({activities.filter((item) => item.category === category).length})</a>)}</div>
     {categories.filter((category) => category !== 'Semua').map((category) => <section key={category}>
       <div className="section-heading section-gap"><div><h2>{category}</h2></div><a className="text-link" href={`#/kategori/${slugify(category)}`}>Halaman kategori <ArrowRight size={14}/></a></div>
@@ -131,7 +136,8 @@ function Home({ saved, toggleSaved }) {
       <section className="values-strip"><a className="value-link" href="#/nilai/ikuti-ritme-anak"><span className="value-icon"><Heart size={17}/></span><span>Ikuti ritme anak</span></a><span className="value-separator">✳</span><a className="value-link" href="#/nilai/pakai-yang-ada-di-rumah"><span className="value-icon"><Leaf size={17}/></span><span>Pakai yang ada di rumah</span></a><span className="value-separator">✳</span><a className="value-link" href="#/nilai/proses-lebih-berarti"><span className="value-icon"><Sparkles size={17}/></span><span>Proses lebih berarti dari hasil</span></a></section>
 
       <section className="activities section-wrap" id="aktivitas"><div className="section-heading"><div><div className="eyebrow">IDE KECIL, MAKNA BESAR</div><h2>Mulai dari yang <em>sederhana.</em></h2><p>Pilih satu kegiatan, siapkan bersama, lalu nikmati prosesnya.</p></div><span className="activity-count">{activities.length} ide untuk dicoba <span>↘</span></span></div>
-        <div className="filters" aria-label="Kategori aktivitas"><a className="filter active" href="#/semua">Semua ({activities.length})</a>{categories.map((category) => <a key={category} className="filter" href={`#/kategori/${slugify(category)}`}>{category}</a>)}</div>
+        <div className="filters collections" aria-label="Koleksi"><span className="filters-label">Koleksi</span><a className="filter" href="#/memasak">Memasak bersama anak ({activities.filter((item) => item.collections?.includes('memasak')).length})</a><a className="filter" href="#/playdate">Panduan playdate</a></div>
+        <div className="filters" aria-label="Kategori aktivitas"><a className="filter active" href="#/semua">Semua ({activities.length})</a>{categories.filter((category) => category !== 'Semua').map((category) => <a key={category} className="filter" href={`#/kategori/${slugify(category)}`}>{category}</a>)}</div>
         <div className="activity-grid">{activities.slice(0, 8).map((activity, index) => <ActivityCard key={activity.title} activity={activity} index={index} saved={saved} onToggle={toggleSaved} />)}</div>
         <div className="see-all"><a className="button-primary" href="#/semua">Lihat semua {activities.length} ide <ArrowRight size={16}/></a></div>
       </section>
@@ -164,6 +170,8 @@ function App() {
   let page = <Home saved={saved} toggleSaved={toggleSaved} />
   if (route.page === 'kategori') page = <SubPage eyebrow="KATEGORI" title={route.name} intro={categoryInfo[route.name].intro} pointsTitle="CATATAN KECIL" points={categoryInfo[route.name].tips} items={activities.filter((item) => item.category === route.name)} sheets={printables.filter((item) => item.category === route.name)} saved={saved} onToggle={toggleSaved} />
   if (route.page === 'montessori') page = <MontessoriPage />
+  if (route.page === 'playdate') page = <PlaydatePage />
+  if (route.page === 'memasak') page = <SubPage eyebrow="KOLEKSI" title="Memasak bersama anak" intro="Dapur adalah ruang belajar yang nyata: anak berhitung, menakar, mengikuti langkah, dan mencoba rasa baru. Pilih satu resep sederhana dan bagi tugas sesuai kemampuan anak." pointsTitle="SEBELUM MULAI" points={['Cuci tangan dengan sabun sebelum dan sesudah memasak, dan kenakan celemek.', 'Bagi tugas sesuai kemampuan: anak mencuci, mengaduk, menuang, dan menata. Kompor, oven, pisau tajam, dan blender hanya untuk orang dewasa.', 'Tanyakan lebih dulu soal alergi (telur, susu, gluten, kacang) pada anak yang ikut makan.', 'Madu tidak untuk anak di bawah 1 tahun.', 'Biarkan berantakan sedikit. Prosesnya lebih penting daripada hasilnya.']} items={activities.filter((item) => item.collections?.includes('memasak'))} sheets={['kartu-makanan', 'utuh-dan-potong'].map((id) => printableById[id])} saved={saved} onToggle={toggleSaved} />
   if (route.page === 'semua') page = <AllPage saved={saved} onToggle={toggleSaved} />
   if (route.page === 'aktivitas') page = <ActivityPage activity={activityBySlug[route.slug]} saved={saved} onToggle={toggleSaved} />
   if (route.page === 'cetak') page = <PrintPage item={printableById[route.id]} />

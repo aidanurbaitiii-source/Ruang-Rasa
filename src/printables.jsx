@@ -377,6 +377,67 @@ function kartuPerasaan() {
   </Page>]
 }
 
+// ---------- 5. Budaya ----------
+function hewanDanRumahnya() {
+  const sets = [
+    { left: [['🐠', 'ikan'], ['🐒', 'monyet'], ['🐄', 'sapi'], ['🐱', 'kucing'], ['🦆', 'bebek'], ['🐪', 'unta']], right: [['🌊', 'laut'], ['🌳', 'hutan'], ['🌾', 'padang rumput'], ['🏠', 'rumah'], ['💧', 'kolam'], ['🏜️', 'gurun']], order: [3, 5, 1, 0, 4, 2] },
+    { left: [['🐧', 'penguin'], ['🦅', 'elang'], ['🐟', 'ikan'], ['🐿️', 'tupai'], ['🐸', 'kodok'], ['🐛', 'ulat']], right: [['🧊', 'es dan kutub'], ['⛰️', 'gunung'], ['🏞️', 'sungai'], ['🌲', 'pohon'], ['💧', 'kolam'], ['🍃', 'daun']], order: [4, 2, 5, 0, 3, 1] },
+  ]
+  return sets.flatMap(({ left, right, order }, si) => [false, true].map((answer) => <MatchSheet key={`${si}${answer}`} answer={answer} rows={left} step={36} top={62} order={order}
+    title={answer ? `Lembar koreksi: hewan dan rumahnya ${si + 1}` : `Hewan dan rumahnya ${si + 1}`} lines={answer ? ['Garis merah menunjukkan pasangan yang benar.'] : ['Tarik garis dari hewan di kiri ke tempat tinggalnya di kanan.']}
+    drawLeft={(i, x, y) => <text x={x} y={y} className="s-emoji" textAnchor="middle" dominantBaseline="central">{left[i][0]}</text>}
+    drawRight={(j, x, y) => <text x={x} y={y} className="s-emoji" textAnchor="middle" dominantBaseline="central">{right[j][0]}</text>}
+    labelLeft={(i) => left[i][1]} labelRight={(j) => right[j][1]} />))
+}
+
+function terapungTenggelam() {
+  const items = [['🍃', 'daun'], ['🪨', 'batu'], ['🥄', 'sendok logam'], ['🪵', 'ranting kayu'], ['🍎', 'apel'], ['🥕', 'wortel'], ['🔑', 'kunci'], ['🪶', 'bulu']]
+  const box = (x, y) => <rect x={x} y={y - 3.6} width="5" height="5" rx="1" fill="#fff" stroke={OLIVE} strokeWidth=".5" />
+  return [
+    <Page key="t" title="Tenggelam atau terapung?" lines={['Tebak lebih dulu: apakah benda ini terapung atau tenggelam? Centang tebakanmu, lalu coba di baskom air dan centang hasilnya.']}>
+      <text x="76" y="52" className="s-label">Tebakanku</text><text x="136" y="52" className="s-label">Hasilnya</text>
+      {items.map(([e, n], i) => {
+        const y = 66 + i * 26
+        return <g key={n}>
+          <line x1="12" y1={y + 9} x2="198" y2={y + 9} stroke="#e1dacd" strokeWidth=".4" />
+          <text x="22" y={y} className="s-emoji" textAnchor="middle" dominantBaseline="central">{e}</text>
+          <text x="34" y={y + 1.2} className="s-text">{n}</text>
+          {box(76, y + 1)}<text x="83" y={y + 1.4} className="s-label">terapung</text>{box(100, y + 1)}<text x="107" y={y + 1.4} className="s-label">tenggelam</text>
+          {box(136, y + 1)}<text x="143" y={y + 1.4} className="s-label">terapung</text>{box(160, y + 1)}<text x="167" y={y + 1.4} className="s-label">tenggelam</text>
+        </g>
+      })}
+      <Lines x={12} y={282} lines={['Apa yang sama pada benda-benda yang terapung? Ceritakan pada orang dewasa.']} />
+    </Page>,
+    <Page key="k" name={false} title="Catatan untuk orang dewasa" lines={['Hasil bisa berbeda tergantung bendanya, jadi selalu dicoba langsung. Biasanya:']}>
+      {[['🍃', 'daun', 'terapung'], ['🪨', 'batu', 'tenggelam'], ['🥄', 'sendok logam', 'tenggelam'], ['🪵', 'ranting kayu', 'terapung'], ['🍎', 'apel', 'terapung'], ['🥕', 'wortel', 'tenggelam'], ['🔑', 'kunci', 'tenggelam'], ['🪶', 'bulu', 'terapung']].map(([e, n, r], i) => <g key={n}>
+        <text x="20" y={60 + i * 16} className="s-emoji" textAnchor="middle" dominantBaseline="central">{e}</text>
+        <text x="38" y={61 + i * 16} className="s-text">{n}: <tspan className="s-key">{r}</tspan></text>
+      </g>)}
+      <Lines x={12} y={206} lines={['Ajukan pertanyaan terbuka: "Menurutmu kenapa?" Tidak ada jawaban yang salah. Anak sedang belajar mengamati dan membandingkan.']} />
+    </Page>,
+  ]
+}
+
+function tumbuhDariBiji() {
+  const stages = [['🌰', 'biji'], ['💧', 'diberi air'], ['🌱', 'tunas muncul'], ['🌿', 'daun tumbuh'], ['🌻', 'berbunga']]
+  return [
+    <Page key="c" name={false} title="Tumbuh dari biji" lines={['Gunting kartunya dan acak. Anak menyusun urutannya dari biji sampai berbunga, lalu menceritakan apa yang terjadi di setiap tahap.']}>
+      {stages.map(([e, n], i) => {
+        const x = 12 + (i % 2) * 98, y = 52 + Math.floor(i / 2) * 78
+        return <CutCard key={n} x={x} y={y} w={88} h={72}><text x={x + 44} y={y + 33} className="s-emoji-xl" textAnchor="middle" dominantBaseline="central">{e}</text><text x={x + 44} y={y + 62} className="s-word" textAnchor="middle">{n}</text></CutCard>
+      })}
+    </Page>,
+    <Page key="u" name={false} title="Urutan yang benar" lines={['Tumbuhan melewati beberapa tahap sebelum berbunga. Cocokkan susunan anak dengan urutan ini.']}>
+      {stages.map(([e, n], i) => <g key={n}>
+        <circle cx="30" cy={70 + i * 36} r="9" fill="#e5e9dc" stroke={OLIVE} strokeWidth=".5" /><text x="30" y={73 + i * 36} className="s-math" textAnchor="middle">{i + 1}</text>
+        <text x="56" y={70 + i * 36} className="s-emoji" textAnchor="middle" dominantBaseline="central">{e}</text>
+        <text x="72" y={72 + i * 36} className="s-word-l">{n}</text>
+        {i < stages.length - 1 && <path d={`M30 ${81 + i * 36}v8`} stroke={OLIVE} strokeWidth=".6" markerEnd="none" />}
+      </g>)}
+    </Page>,
+  ]
+}
+
 export const printables = [
   { id: 'penjumlahan-tambah-satu', category: 'Matematika', icon: '➕', title: 'Menambah satu', summary: 'Hitung bulatan, tambah satu, tulis jawabannya. Ada lembar koreksi untuk mengecek sendiri.', how: 'Cetak lembar pertama untuk anak dan simpan lembar koreksi untuk orang dewasa. Mulai dari baris pertama dan berhenti kapan pun anak lelah.', pages: penjumlahan },
   { id: 'kartu-angka', category: 'Matematika', icon: '🔢', title: 'Kartu angka 1–20', summary: 'Kartu angka dengan tulisan namanya, ditambah simbol + − =.', how: 'Gunting kartunya. Tunjukkan satu per satu, atau susun berurutan bersama anak.', pages: kartuAngka },
@@ -385,9 +446,12 @@ export const printables = [
   { id: 'cocokkan-bentuk', category: 'Sensorial', icon: '🔷', title: 'Cocokkan bentuk', summary: 'Tarik garis antara bentuk yang sama. Empat lembar (6 dan 8 bentuk) dengan lembar koreksi.', how: 'Mulai dari lembar 1 dan 3 (6 bentuk). Lembar 2 dan 4 lebih menantang (8 bentuk).', pages: cocokkanBentuk },
   { id: 'roda-warna', category: 'Sensorial', icon: '🎨', title: 'Roda warna dan campur warna', summary: 'Roda warna primer dan sekunder, campur warna, tiga lingkaran ajaib, dan berburu warna (5 halaman).', how: 'Siapkan krayon merah, kuning, biru, jingga, hijau, dan ungu.', pages: rodaWarna },
   { id: 'berburu-benda', category: 'Sensorial', icon: '🔎', title: 'Berburu benda di sekitar', summary: 'Daftar petunjuk indra: kasar, halus, harum, dingin, berbunyi, dan lainnya.', how: 'Bawa lembar ini berjalan keliling rumah atau halaman. Centang setiap temuan.', pages: berburu },
-  { id: 'empat-musim', category: 'Sensorial', icon: '🍂', title: 'Empat musim', summary: 'Pasangkan gambar dengan musim semi, panas, gugur, dan dingin. Dua lembar dengan lembar koreksi.', how: 'Ceritakan bahwa Indonesia punya musim hujan dan kemarau, sedangkan di negara lain ada empat musim.', pages: empatMusim },
+  { id: 'empat-musim', category: 'Budaya', icon: '🍂', title: 'Empat musim', summary: 'Pasangkan gambar dengan musim semi, panas, gugur, dan dingin. Dua lembar dengan lembar koreksi.', how: 'Ceritakan bahwa Indonesia punya musim hujan dan kemarau, sedangkan di negara lain ada empat musim.', pages: empatMusim },
+  { id: 'hewan-dan-rumahnya', category: 'Budaya', icon: '🦒', title: 'Hewan dan rumahnya', summary: 'Pasangkan hewan dengan tempat tinggalnya: laut, hutan, kolam, gurun, dan lainnya. Dua lembar dengan lembar koreksi.', how: 'Setelah mengerjakan lembar ini, cari gambar hewan lain dan tebak di mana ia tinggal.', pages: hewanDanRumahnya },
+  { id: 'terapung-tenggelam', category: 'Budaya', icon: '🛁', title: 'Tenggelam atau terapung?', summary: 'Tebak lalu buktikan: benda mana yang terapung dan mana yang tenggelam. Lembar percobaan beserta catatan untuk orang dewasa.', how: 'Siapkan baskom air dan benda-benda aman dari rumah. Centang tebakan, lalu hasilnya.', pages: terapungTenggelam },
+  { id: 'tumbuh-dari-biji', category: 'Budaya', icon: '🌻', title: 'Tumbuh dari biji', summary: 'Kartu urutan tahap tumbuh tanaman dari biji sampai berbunga, ditambah lembar urutan yang benar.', how: 'Gunting kartu dan susun bersama anak. Cocok dipasangkan dengan aktivitas menanam biji kacang.', pages: tumbuhDariBiji },
   { id: 'utuh-dan-potong', category: 'Kehidupan praktis', icon: '🍎', title: 'Utuh dan potong', summary: 'Pasangkan buah dan sayur yang masih utuh dengan yang sudah dipotong. Empat lembar dengan lembar koreksi.', how: 'Setelah mengerjakan lembar ini, ajak anak menyiapkan buah sungguhan dengan pisau anak.', pages: utuhPotong },
-  { id: 'dari-mana-asalnya', category: 'Kehidupan praktis', icon: '🐑', title: 'Dari mana asalnya?', summary: 'Telur dari ayam, susu dari sapi, kertas dari pohon. Dua lembar dengan lembar koreksi.', how: 'Obrolkan juga benda lain di rumah: dari mana asalnya?', pages: asalUsul },
+  { id: 'dari-mana-asalnya', category: 'Budaya', icon: '🐑', title: 'Dari mana asalnya?', summary: 'Telur dari ayam, susu dari sapi, kertas dari pohon. Dua lembar dengan lembar koreksi.', how: 'Obrolkan juga benda lain di rumah: dari mana asalnya?', pages: asalUsul },
   { id: 'menjahit-bentuk', category: 'Kehidupan praktis', icon: '🧵', title: 'Menjahit bentuk', summary: 'Dua belas kartu jahit: lingkaran, persegi, segitiga, bintang, hati, segi enam, oval, rumah, dan lainnya.', how: 'Cetak di kertas tebal, lubangi titiknya, lalu jahit memakai benang wol atau tali sepatu.', pages: menjahit },
   { id: 'menjiplak-huruf', category: 'Bahasa', icon: '✏️', title: 'Menjiplak huruf A–Z', summary: 'Jiplak huruf besar dan kecil putus-putus untuk melatih pegangan pensil.', how: 'Mulai dari huruf di nama anak. Satu baris sudah cukup untuk satu hari.', pages: jiplakHuruf },
   { id: 'kartu-huruf', category: 'Bahasa', icon: '🔤', title: 'Kartu huruf: A untuk apel', summary: 'Kartu huruf bergambar dengan kata bahasa Indonesia untuk setiap huruf (huruf Q punya dua kartu: Al-Qur\'an dan queen).', how: 'Gunting dan cetak berkali-kali sesuai kebutuhan. Mainkan sebagai tebak bunyi awal.', pages: kartuHuruf },

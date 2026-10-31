@@ -12,9 +12,9 @@ export const stages = [
   {
     slug: '6-12-tahun', range: [6, 12], age: '6–12 tahun', name: 'Pikiran yang bernalar',
     note: 'Anak mulai beralih dari hal konkret ke hal abstrak, dan semakin ingin tahu tentang dunia.',
-    intro: 'Pada tahap ini, menurut Montessori, cara berpikir anak mulai bergeser dari hal yang konkret ke hal yang abstrak, dan rasa ingin tahunya tentang dunia semakin luas.',
-    traits: ['Peralihan dari berpikir konkret ke abstrak', 'Rasa ingin tahu yang semakin luas'],
-    refs: [4],
+    intro: 'Pada tahap ini, menurut Montessori, cara berpikir anak mulai bergeser dari hal yang konkret ke hal yang abstrak. Imajinasi, rasa ingin tahu intelektual, dan pencarian pemahaman moral berkembang, begitu pula keinginan untuk bekerja bersama teman sebaya.',
+    traits: ['Peralihan dari berpikir konkret ke abstrak', 'Imajinasi dan rasa ingin tahu intelektual', 'Pencarian pemahaman moral', 'Semakin ingin bekerja dengan teman sebaya'],
+    refs: [4, 17],
   },
   {
     slug: '12-18-tahun', range: [12, 18], age: '12–18 tahun', name: 'Masa remaja',

@@ -55,6 +55,7 @@ export const sources = [
   { n: 14, type: 'Organisasi Montessori', org: 'Association Montessori Internationale (AMI)', title: 'Four Planes of Development: Fourth Plane', url: 'https://archives.montessori-ami.org/help/glossary/four-planes-development-fourth-plane' },
   { n: 15, type: 'Artikel esai', org: 'Wolff, P., & Seldin, T.', year: 2019, title: 'The needs of the fourth plane of development', venue: 'Montessori Post', url: 'https://www.montessoripost.com/2019/12/01/the-needs-of-the-fourth-plane-of-development/' },
   { n: 16, type: 'Ensiklopedia daring', org: 'Wikipedia', title: 'Erdkinder', url: 'https://en.wikipedia.org/wiki/Erdkinder' },
+  { n: 17, type: 'Organisasi Montessori', org: 'Association Montessori Internationale (AMI)', title: 'Four Planes of Development: Second Plane', url: 'https://archives.montessori-ami.org/help/glossary/four-planes-development-second-plane' },
   { n: 12, type: 'Jurnal ilmiah', org: 'Jurnal Agapedia (Universitas Pendidikan Indonesia)', title: 'Penerapan Pendekatan Montessori dalam Pendidikan Anak Usia Dini di Indonesia: Tantangan dan Peluang', url: 'https://ejournal.upi.edu/index.php/agapedia/article/view/85925' },
 ]
 
@@ -121,7 +122,7 @@ export default function MontessoriPage() {
     <section>
       <h2>Empat tahap perkembangan</h2>
       <p className="mt-lead">Montessori membagi perkembangan manusia menjadi empat tahap yang masing-masing berlangsung sekitar enam tahun.<Ref ids={[4]} /> Ruang Rasa berada di tahap pertama.</p>
-      <p className="mt-lead">Untuk tahap remaja, Montessori mengusulkan Erdkinder ("anak-anak tanah"): belajar lewat kerja nyata di lahan dan komunitas.<Ref ids={[13, 16]} /> Tahap dewasa muda digambarkan sebagai masa memantapkan identitas dan mencari kontribusi yang bermakna bagi masyarakat.<Ref ids={[14]} /> Montessori sendiri menulis relatif sedikit tentang tahap ini, sehingga banyak penjelasannya berasal dari tafsir pendidik sesudahnya.<Ref ids={[15]} /></p>
+      <p className="mt-lead">Pada tahap usia sekolah (6–12 tahun), pendidikan Montessori menekankan imajinasi, rasa ingin tahu intelektual, dan kemampuan sosial.<Ref ids={[17]} /> Untuk tahap remaja, Montessori mengusulkan Erdkinder ("anak-anak tanah"): belajar lewat kerja nyata di lahan dan komunitas.<Ref ids={[13, 16]} /> Tahap dewasa muda digambarkan sebagai masa memantapkan identitas dan mencari kontribusi yang bermakna bagi masyarakat.<Ref ids={[14]} /> Montessori sendiri menulis relatif sedikit tentang tahap ini, sehingga banyak penjelasannya berasal dari tafsir pendidik sesudahnya.<Ref ids={[15]} /></p>
       <div className="mt-planes">{stages.map((item) => { const count = activities.filter((activity) => stageIncludes(item, activity.age)).length; return <a key={item.slug} href={`#/usia/${item.slug}`} className="mt-plane"><strong>{item.age}</strong><span className="mt-plane-name">{item.name}</span><p>{item.note}</p><span className="mt-plane-link">{count > 0 ? `${count} aktivitas` : 'Segera hadir'} <ArrowRight size={13}/></span></a> })}</div>
     </section>
 

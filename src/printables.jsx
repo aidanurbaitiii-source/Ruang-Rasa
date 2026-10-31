@@ -273,14 +273,23 @@ function jiplakHuruf() {
   </Page>)
 }
 
+// gambar xilofon sederhana (tidak ada emoji xilofon): bilah warna-warni dengan dua pemukul
+const xilofon = (cx, cy) => <g>
+  {[24, 21, 18, 15, 12].map((len, i) => <rect key={i} x={cx - 13 + i * 5.4} y={cy - len / 2} width="4.2" height={len} rx="1" fill={PALETTE[i]} stroke={OLIVE} strokeWidth=".35" />)}
+  <line x1={cx - 13} y1={cy - 6} x2={cx + 13} y2={cy - 3} stroke={TERRA} strokeWidth=".7" strokeLinecap="round" />
+  <line x1={cx - 13} y1={cy + 6} x2={cx + 13} y2={cy + 3} stroke={TERRA} strokeWidth=".7" strokeLinecap="round" />
+  <line x1={cx + 3} y1={cy - 17} x2={cx + 12} y2={cy - 8} stroke={TERRA} strokeWidth=".7" strokeLinecap="round" /><circle cx={cx + 2.4} cy={cy - 17.6} r="1.6" fill={TERRA} />
+  <line x1={cx + 16} y1={cy - 15} x2={cx + 9} y2={cy - 7} stroke={TERRA} strokeWidth=".7" strokeLinecap="round" /><circle cx={cx + 16.6} cy={cy - 15.6} r="1.6" fill={TERRA} />
+</g>
+
 function kartuHuruf() {
-  const cards = [['A', 'apel', '🍎'], ['B', 'bola', '⚽'], ['C', 'cicak', '🦎'], ['D', 'domba', '🐑'], ['E', 'es krim', '🍦'], ['F', 'foto', '📷'], ['G', 'gajah', '🐘'], ['H', 'harimau', '🐯'], ['I', 'ikan', '🐟'], ['J', 'jeruk', '🍊'], ['K', 'kucing', '🐱'], ['L', 'lebah', '🐝'], ['M', 'mangga', '🥭'], ['N', 'nanas', '🍍'], ['O', 'orang utan', '🦧'], ['P', 'pisang', '🍌'], ['Q', 'queen (ratu)', '👑'], ['R', 'rumah', '🏠'], ['S', 'sapi', '🐄'], ['T', 'topi', '🎩'], ['U', 'ular', '🐍'], ['V', 'vas bunga', '🏺'], ['W', 'wajan', '🍳'], ['X', 'xilofon', '🎹'], ['Y', 'yoyo', '🪀'], ['Z', 'zebra', '🦓']]
+  const cards = [['A', 'apel', '🍎'], ['B', 'bola', '⚽'], ['C', 'cicak', '🦎'], ['D', 'domba', '🐑'], ['E', 'es krim', '🍦'], ['F', 'foto', '📷'], ['G', 'gajah', '🐘'], ['H', 'harimau', '🐯'], ['I', 'ikan', '🐟'], ['J', 'jeruk', '🍊'], ['K', 'kucing', '🐱'], ['L', 'lebah', '🐝'], ['M', 'mangga', '🥭'], ['N', 'nanas', '🍍'], ['O', 'orang utan', '🦧'], ['P', 'pisang', '🍌'], ['Q', "Al-Qur'an", '📖'], ['Q', 'queen (ratu)', '👑'], ['R', 'rumah', '🏠'], ['S', 'sapi', '🐄'], ['T', 'topi', '🎩'], ['U', 'ular', '🐍'], ['V', 'vas bunga', '🏺'], ['W', 'wajan', '🍳'], ['X', 'xilofon', xilofon], ['Y', 'yoyo', '🪀'], ['Z', 'zebra', '🦓']]
   return chunk(cards, 8).map((group, p) => <Page key={p} name={false} title="Kartu huruf: A untuk apel…" lines={['Gunting kartunya. Sebutkan bunyi huruf, lihat gambarnya, lalu baca katanya bersama.']}>
     {group.map(([l, w, e], i) => {
       const x = 12 + (i % 2) * 98, y = 50 + Math.floor(i / 2) * 58
-      return <CutCard key={l} x={x} y={y} w={88} h={52}>
+      return <CutCard key={w} x={x} y={y} w={88} h={52}>
         <text x={x + 8} y={y + 33} className="s-letter" fill={OLIVE}>{l}<tspan fill={TERRA}>{l.toLowerCase()}</tspan></text>
-        <text x={x + 65} y={y + 28} className="s-emoji" textAnchor="middle" dominantBaseline="central">{e}</text>
+        {typeof e === 'function' ? e(x + 65, y + 28) : <text x={x + 65} y={y + 28} className="s-emoji" textAnchor="middle" dominantBaseline="central">{e}</text>}
         <text x={x + 44} y={y + 47} className="s-word" textAnchor="middle">{w}</text>
       </CutCard>
     })}
@@ -321,7 +330,7 @@ export const printables = [
   { id: 'dari-mana-asalnya', category: 'Kehidupan praktis', icon: '🐑', title: 'Dari mana asalnya?', summary: 'Telur dari ayam, susu dari sapi, kertas dari pohon. Pasangkan benda dengan asalnya.', how: 'Obrolkan juga benda lain di rumah: dari mana asalnya?', pages: asalUsul },
   { id: 'menjahit-bentuk', category: 'Kehidupan praktis', icon: '🧵', title: 'Menjahit bentuk', summary: 'Kartu jahit berbentuk lingkaran, persegi, segitiga, bintang, hati, dan segi enam.', how: 'Cetak di kertas tebal, lubangi titiknya, lalu jahit memakai benang wol atau tali sepatu.', pages: menjahit },
   { id: 'menjiplak-huruf', category: 'Bahasa', icon: '✏️', title: 'Menjiplak huruf A–Z', summary: 'Jiplak huruf besar dan kecil putus-putus untuk melatih pegangan pensil.', how: 'Mulai dari huruf di nama anak. Satu baris sudah cukup untuk satu hari.', pages: jiplakHuruf },
-  { id: 'kartu-huruf', category: 'Bahasa', icon: '🔤', title: 'Kartu huruf: A untuk apel', summary: 'Kartu huruf bergambar dengan kata bahasa Indonesia untuk setiap huruf.', how: 'Gunting dan cetak berkali-kali sesuai kebutuhan. Mainkan sebagai tebak bunyi awal.', pages: kartuHuruf },
+  { id: 'kartu-huruf', category: 'Bahasa', icon: '🔤', title: 'Kartu huruf: A untuk apel', summary: 'Kartu huruf bergambar dengan kata bahasa Indonesia untuk setiap huruf (huruf Q punya dua kartu: Al-Qur\'an dan queen).', how: 'Gunting dan cetak berkali-kali sesuai kebutuhan. Mainkan sebagai tebak bunyi awal.', pages: kartuHuruf },
   { id: 'kartu-makanan', category: 'Bahasa', icon: '🍓', title: 'Kartu gambar: buah dan makanan', summary: 'Set tiga bagian (kartu kontrol, kartu gambar, kartu kata) untuk memperkaya kosakata.', how: 'Mulai dengan kartu gambar saja, lalu tambahkan kartu kata setelah anak hafal.', pages: () => PictureSet({ items: FOOD_SET, name: 'buah dan makanan' }) },
   { id: 'kartu-hewan', category: 'Bahasa', icon: '🐘', title: 'Kartu gambar: hewan', summary: 'Set tiga bagian dengan 12 hewan yang akrab bagi anak.', how: 'Tiru suara hewannya sambil menyebut nama pada kartu.', pages: () => PictureSet({ items: ANIMAL_SET, name: 'hewan' }) },
   { id: 'kartu-benda-rumah', category: 'Bahasa', icon: '🏠', title: 'Kartu gambar: benda di rumah', summary: 'Set tiga bagian dengan benda sehari-hari di rumah.', how: 'Setelah mencocokkan kartu, ajak anak mencari benda aslinya di rumah.', pages: () => PictureSet({ items: HOME_SET, name: 'benda di rumah' }) },

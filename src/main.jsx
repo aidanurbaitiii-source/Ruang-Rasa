@@ -1,6 +1,6 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { ArrowDown, ArrowLeft, ArrowRight, Printer, Clock3, Heart, Leaf, Sparkles, Sun, Users } from 'lucide-react'
+import { ArrowDown, ArrowLeft, ArrowRight, Menu, Printer, X, Clock3, Heart, Leaf, Sparkles, Sun, Users } from 'lucide-react'
 import logoHorizontal from './assets/logo/logo-horizontal.svg'
 import logoArch from './assets/logo/logo-arch.svg'
 import logoScene from './assets/logo/logo-scene.svg'
@@ -9,6 +9,8 @@ import { activities, activityBySlug } from './activities.js'
 import MontessoriPage, { Ref, SourceList } from './MontessoriPage.jsx'
 import { references } from './references.js'
 import { stages, stageBySlug, stageIncludes, stageForAge } from './stages.js'
+import ArticlePage from './ArticlePage.jsx'
+import { articleBySlug } from './articles.js'
 import PlaydatePage from './PlaydatePage.jsx'
 import './styles.css'
 
@@ -24,11 +26,8 @@ const categoryInfo = {
   'Bahasa': { intro: 'Memperkaya kosakata lewat cerita, gambar, dan percakapan sehari-hari. Anak belajar mendengarkan, menamai, dan menceritakan dunianya dengan kata-kata sendiri.', tips: ['Ikuti kata-kata anak, jangan buru-buru mengoreksi.', 'Beri jeda agar anak sempat menjawab.', 'Pilih buku bergambar yang jelas dan tidak terlalu ramai.'] },
 }
 
-const values = {
-  'ikuti-ritme-anak': { icon: Heart, title: 'Ikuti ritme anak', intro: 'Setiap anak punya waktunya sendiri. Ada yang langsung tertarik, ada yang mengamati dulu dari jauh. Dua-duanya sedang belajar.', points: ['Perhatikan apa yang sedang menarik minatnya hari ini, lalu mulai dari situ.', 'Berhenti saat anak sudah selesai, meski kegiatan belum "rampung".', 'Ulangi kegiatan yang sama selama anak masih menikmatinya. Pengulangan membangun penguasaan.'], related: ['Menceritakan gambar', 'Mengurutkan benda alam', 'Menuang air', 'Memindahkan kacang'] },
-  'pakai-yang-ada-di-rumah': { icon: Leaf, title: 'Pakai yang ada di rumah', intro: 'Belajar tidak butuh alat mahal. Sendok, mangkuk, kaus kaki, dan daun dari halaman sudah cukup untuk memulai.', points: ['Lihat dulu isi dapur, lemari, dan halaman sebelum membeli apa pun.', 'Pilih benda nyata yang aman dan menarik, bukan mainan plastik yang serba bisa.', 'Libatkan anak menyiapkan bahannya. Itu sudah bagian dari kegiatannya.'], related: ['Mencari pasangan kaus kaki', 'Mencuci daun', 'Memindahkan kacang', 'Mencocokkan warna'] },
-  'proses-lebih-berarti': { icon: Sparkles, title: 'Proses lebih berarti dari hasil', intro: 'Yang tumbuh adalah kemampuan dan rasa percaya diri anak, bukan hasil yang rapi. Hasilnya boleh berantakan.', points: ['Hindari menilai ("bagus" atau "salah"). Cukup ceritakan apa yang kamu lihat.', 'Biarkan anak mencoba lagi sendiri sebelum menawarkan bantuan.', 'Tak harus sempurna. Cukup hadir bersama.'], related: ['Menuang air', 'Mencuci daun', 'Membuat pola sederhana', 'Mengurutkan benda alam'] },
-}
+
+const Spark = () => <svg className="spark" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" fill="none"/></svg>
 
 function ActivityCard({ activity, index, saved, onToggle }) {
   const isSaved = saved.includes(activity.title)
@@ -47,7 +46,7 @@ function parseRoute(hash) {
   if (m[1] === 'aktivitas') return activityBySlug[m[2]] ? { page: 'aktivitas', slug: m[2] } : { page: 'home' }
   if (m[1] === 'cetak') return printableById[m[2]] ? { page: 'cetak', id: m[2] } : { page: 'home' }
   if (m[1] === 'kategori') { const name = categories.find((c) => c !== 'Semua' && slugify(c) === m[2]); return name ? { page: 'kategori', name } : { page: 'home' } }
-  return values[m[2]] ? { page: 'nilai', slug: m[2] } : { page: 'home' }
+  return articleBySlug[m[2]] ? { page: 'nilai', slug: m[2] } : { page: 'home' }
 }
 
 function useRoute() {
@@ -56,7 +55,7 @@ function useRoute() {
   return { route: parseRoute(hash), hash }
 }
 
-function ActivityPage({ activity, saved, onToggle }) {
+function ActivityPage({ activity, saved, onToggle, plan, onTogglePlan }) {
   const sheets = activity.printables.map((id) => printableById[id]).filter(Boolean)
   const stage = stageForAge(activity.age)
   const sameCategory = activities.filter((item) => item.category === activity.category && item.slug !== activity.slug)
@@ -64,12 +63,14 @@ function ActivityPage({ activity, saved, onToggle }) {
   const sameStage = stage ? activities.filter((item) => item.slug !== activity.slug && stageIncludes(stage, item.age)).sort((a, b) => Number(b.category === activity.category) - Number(a.category === activity.category)) : sameCategory
   const others = (sameStage.length > 0 ? sameStage : sameCategory).slice(0, 3)
   const isSaved = saved.includes(activity.title)
+  const inPlan = plan.slugs.includes(activity.slug)
+  const planFull = !inPlan && plan.slugs.length >= MAX_PLAN
   const { photo } = activity
   return <main className="subpage activity-page section-wrap">
     <a className="back-link" href={`#/kategori/${slugify(activity.category)}`}><ArrowLeft size={15}/> {activity.category}</a>
     <div className="activity-head">
       <div><div className="eyebrow">{activity.category.toUpperCase()}</div><h1>{activity.title}</h1><p className="subpage-intro">{activity.intro}</p>
-        <div className="activity-chips">{stageForAge(activity.age) ? <a className="chip-link" href={`#/usia/${stageForAge(activity.age).slug}`}>{activity.age} <ArrowRight size={12}/></a> : <span>{activity.age}</span>}<span><Clock3 size={14}/> {activity.time}</span>{activity.mess && <span>Berantakan: {activity.mess}</span>}<button className={isSaved ? 'chip-button saved' : 'chip-button'} onClick={() => onToggle(activity.title)}><Heart size={14} fill={isSaved ? 'currentColor' : 'none'}/> {isSaved ? 'Tersimpan' : 'Simpan'}</button></div></div>
+        <div className="activity-chips">{stageForAge(activity.age) ? <a className="chip-link" href={`#/usia/${stageForAge(activity.age).slug}`}>{activity.age} <ArrowRight size={12}/></a> : <span>{activity.age}</span>}<span><Clock3 size={14}/> {activity.time}</span>{activity.mess && <span>Berantakan: {activity.mess}</span>}<button className={isSaved ? 'chip-button saved' : 'chip-button'} onClick={() => onToggle(activity.title)}><Heart size={14} fill={isSaved ? 'currentColor' : 'none'}/> {isSaved ? 'Tersimpan' : 'Simpan'}</button><button className={inPlan ? 'chip-button saved' : 'chip-button'} disabled={planFull} title={planFull ? `Rencana penuh (maksimal ${MAX_PLAN})` : undefined} onClick={() => onTogglePlan(activity.slug)}><Printer size={14}/> {inPlan ? 'Ada di rencana cetak' : 'Tambah ke rencana cetak'}</button></div></div>
       <div className={`card-art activity-hero ${activity.color}`}><span>{activity.icon}</span></div>
     </div>
     <div className="activity-layout">
@@ -100,9 +101,11 @@ function AllPage({ saved, onToggle }) {
     <a className="back-link" href="#aktivitas"><ArrowLeft size={15}/> Beranda</a>
     <div className="eyebrow">KUMPULAN IDE</div><h1>Semua ide aktivitas</h1>
     <p className="subpage-intro">{activities.length} ide kegiatan sederhana dengan bahan sehari-hari, dikelompokkan menurut kategori. Pilih satu, siapkan bersama, lalu nikmati prosesnya.</p>
-    <div className="filters collections"><span className="filters-label">Koleksi</span><a className="filter" href="#/memasak">Memasak bersama anak ({activities.filter((item) => item.collections?.includes('memasak')).length})</a><a className="filter" href="#/playdate">Panduan playdate</a></div>
-    <div className="filters">{categories.filter((category) => category !== 'Semua').map((category) => <a key={category} className="filter" href={`#/kategori/${slugify(category)}`}>{category} ({activities.filter((item) => item.category === category).length})</a>)}</div>
-    <div className="filters collections"><span className="filters-label">Usia</span>{stages.map((stage) => <a key={stage.slug} className="filter" href={`#/usia/${stage.slug}`}>{stage.age} ({activities.filter((item) => stageIncludes(stage, item.age)).length})</a>)}</div>
+    <div className="filter-groups">
+      <div className="filters collections"><span className="filters-label">Koleksi</span><a className="filter" href="#/memasak">Memasak bersama anak ({activities.filter((item) => item.collections?.includes('memasak')).length})</a><a className="filter" href="#/playdate">Panduan playdate</a></div>
+      <div className="filters"><span className="filters-label">Kategori</span>{categories.filter((category) => category !== 'Semua').map((category) => <a key={category} className="filter" href={`#/kategori/${slugify(category)}`}>{category} ({activities.filter((item) => item.category === category).length})</a>)}</div>
+      <div className="filters collections"><span className="filters-label">Usia</span>{stages.map((stage) => <a key={stage.slug} className="filter" href={`#/usia/${stage.slug}`}>{stage.age} ({activities.filter((item) => stageIncludes(stage, item.age)).length})</a>)}</div>
+    </div>
     {categories.filter((category) => category !== 'Semua').map((category) => <section key={category}>
       <div className="section-heading section-gap"><div><h2>{category}</h2></div><a className="text-link" href={`#/kategori/${slugify(category)}`}>Halaman kategori <ArrowRight size={14}/></a></div>
       <div className="activity-grid">{activities.filter((item) => item.category === category).map((activity, index) => <ActivityCard key={activity.slug} activity={activity} index={index} saved={saved} onToggle={onToggle} />)}</div>
@@ -160,24 +163,86 @@ function SubPage({ eyebrow, title, intro, points, pointsTitle, items, saved, onT
   </main>
 }
 
-function Home({ saved, toggleSaved }) {
+const MAX_PLAN = 8
+const PLAN_KEY = 'rr-plan-v1'
+const DEFAULT_PLAN = { slugs: ['memindahkan-kacang', 'mencuci-daun', 'menceritakan-gambar'], name: '', date: '' }
+
+function loadPlan() {
+  try {
+    const raw = JSON.parse(window.localStorage.getItem(PLAN_KEY))
+    if (raw && Array.isArray(raw.slugs)) return { slugs: raw.slugs.filter((slug) => activityBySlug[slug]).slice(0, MAX_PLAN), name: String(raw.name || '').slice(0, 30), date: String(raw.date || '') }
+  } catch (error) { /* penyimpanan tidak tersedia: pakai bawaan */ }
+  return DEFAULT_PLAN
+}
+
+const shortMaterials = (activity) => activity.materials.slice(0, 2).map((item) => item.replace(/\s*\(.*\)/, '')).join(', ')
+
+function Planner({ plan, setPlan, saved }) {
+  const [open, setOpen] = React.useState(false)
+  const [query, setQuery] = React.useState('')
+  const [category, setCategory] = React.useState('Semua')
+  const chosen = plan.slugs.map((slug) => activityBySlug[slug]).filter(Boolean)
+  const favourites = activities.filter((item) => saved.includes(item.title))
+  const needle = query.trim().toLowerCase()
+  const list = activities.filter((item) => (category === 'Semua' || item.category === category) && (!needle || item.title.toLowerCase().includes(needle)))
+  const dateLabel = plan.date ? new Date(`${plan.date}T00:00:00`).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : ''
+  const toggle = (slug) => setPlan((current) => current.slugs.includes(slug) ? { ...current, slugs: current.slugs.filter((item) => item !== slug) } : current.slugs.length >= MAX_PLAN ? current : { ...current, slugs: [...current.slugs, slug] })
+  const move = (index, step) => setPlan((current) => { const slugs = [...current.slugs]; const target = index + step; if (target < 0 || target >= slugs.length) return current; [slugs[index], slugs[target]] = [slugs[target], slugs[index]]; return { ...current, slugs } })
+  return <section className="printable section-wrap" id="printable">
+    <div className="printable-copy">
+      <div className="eyebrow">UNTUK DICETAK, UNTUK DICOBA</div>
+      <h2>Rencana kecil untuk<br/><em>hari yang penuh rasa.</em></h2>
+      <p>Pilih kegiatan yang ingin dicoba hari ini, isi nama si kecil, lalu cetak lembarnya. Pilihanmu tersimpan di peramban ini.</p>
+      <div className="plan-fields">
+        <label>Nama si kecil<input type="text" value={plan.name} maxLength={30} placeholder="Contoh: Aira" onChange={(event) => setPlan((current) => ({ ...current, name: event.target.value }))} /></label>
+        <label>Tanggal<input type="date" value={plan.date} onChange={(event) => setPlan((current) => ({ ...current, date: event.target.value }))} /></label>
+      </div>
+      <div className="plan-chosen">
+        <strong>Kegiatan terpilih ({chosen.length}/{MAX_PLAN})</strong>
+        {chosen.length === 0 ? <p className="plan-empty">Belum ada kegiatan. Klik "Pilih kegiatan" untuk menambahkan.</p> : <ol>{chosen.map((item, index) => <li key={item.slug}><span className="plan-title"><span aria-hidden="true">{item.icon}</span> {item.title}</span><span className="plan-btns"><button type="button" aria-label={`Naikkan ${item.title}`} disabled={index === 0} onClick={() => move(index, -1)}>↑</button><button type="button" aria-label={`Turunkan ${item.title}`} disabled={index === chosen.length - 1} onClick={() => move(index, 1)}>↓</button><button type="button" aria-label={`Hapus ${item.title}`} onClick={() => toggle(item.slug)}><X size={14}/></button></span></li>)}</ol>}
+      </div>
+      <div className="plan-actions">
+        <button type="button" className="button-primary" aria-expanded={open} onClick={() => setOpen((value) => !value)}>{open ? 'Tutup pilihan' : 'Pilih kegiatan'}</button>
+        <button type="button" className="button-primary print-button" disabled={chosen.length === 0} onClick={() => window.print()}><Printer size={16}/> Cetak rencana</button>
+        {favourites.length > 0 && <button type="button" className="text-link as-button" onClick={() => setPlan((current) => ({ ...current, slugs: favourites.map((item) => item.slug).slice(0, MAX_PLAN) }))}>Pakai favorit ({favourites.length})</button>}
+        {chosen.length > 0 && <button type="button" className="text-link as-button" onClick={() => setPlan((current) => ({ ...current, slugs: [] }))}>Kosongkan</button>}
+      </div>
+      {open && <div className="plan-picker">
+        <input type="search" className="plan-search" value={query} placeholder="Cari kegiatan…" aria-label="Cari kegiatan" onChange={(event) => setQuery(event.target.value)} />
+        <div className="plan-cats">{categories.map((name) => <button key={name} type="button" className={name === category ? 'filter active' : 'filter'} onClick={() => setCategory(name)}>{name}</button>)}</div>
+        <p className="plan-note">Pilih sampai {MAX_PLAN} kegiatan agar muat satu halaman. {chosen.length >= MAX_PLAN ? 'Batas tercapai.' : ''}</p>
+        <ul className="plan-list">{list.length === 0 ? <li className="plan-empty">Tidak ada kegiatan yang cocok.</li> : list.map((item) => { const checked = plan.slugs.includes(item.slug); return <li key={item.slug}><label className={checked ? 'checked' : ''}><input type="checkbox" checked={checked} disabled={!checked && chosen.length >= MAX_PLAN} onChange={() => toggle(item.slug)} /><span className="plan-item-title"><span aria-hidden="true">{item.icon}</span> {item.title}</span><span className="plan-item-meta">{item.age} · {item.time}</span></label></li> })}</ul>
+      </div>}
+    </div>
+    <div className="paper-wrap"><div className="paper"><div className="paper-top"><div className="paper-logo"><img className="deer-logo" src={logoScene} alt="" /></div><span>RUANG RASA <i>·</i> LEMBAR KEGIATAN</span></div>
+      <div className="paper-meta"><span>Nama: <b>{plan.name || '____________'}</b></span><span>Tanggal: <b>{dateLabel || '____________'}</b></span></div>
+      <div className="paper-title">Hari ini, kita mencoba…</div>
+      {chosen.length === 0 ? <div className="paper-empty">Pilih kegiatan di samping, dan lembar ini akan terisi.</div> : chosen.map((item, index) => <div className="paper-activity" key={item.slug}><div className="paper-num">{String(index + 1).padStart(2, '0')}</div><div><strong>{item.title}</strong><small>{item.age} · {item.time}<br/>Siapkan: {shortMaterials(item)}</small></div><span className="check-box"/></div>)}
+      <div className="paper-reflect"><span>Setelah mencoba, aku merasa…</span><div className="writing-line"/><div className="writing-line"/></div>
+      <div className="paper-footer"><span>Tak harus sempurna. Cukup hadir bersama.</span><span>ruang rasa <i>✿</i></span></div></div><div className="paper-deco"><Spark/></div></div>
+  </section>
+}
+
+function Home({ saved, toggleSaved, plan, setPlan }) {
   return <main>
       <section className="hero" id="beranda"><div className="hero-copy"><div className="eyebrow"><span className="eyebrow-dot"/> RUANG KECIL UNTUK BERTUMBUH</div><h1>Belajar paling baik,<br/>dimulai dari <em>rumah.</em></h1><p className="hero-text">Ide aktivitas sederhana yang membantu si kecil mengenal dunia—satu kegiatan kecil, satu hari yang penuh rasa.</p><div className="hero-actions"><a className="button-primary" href="#aktivitas">Jelajahi aktivitas <ArrowRight size={17}/></a><a className="text-link" href="#/montessori">Apa itu Montessori? <ArrowRight size={15}/></a></div><div className="hero-note"><span className="avatars"><i>🌼</i><i>🍊</i><i>🌱</i></span><span>Dibuat untuk tumbuh bersama,<br/><strong>tanpa harus sempurna.</strong></span></div></div>
-        <div className="hero-art"><div className="art-frame"><div className="art-blob"/><img className="hero-mark" src={logoArch} alt="Anak kecil dan rusa di bawah lengkung daun" width="230" height="210" /><div className="art-caption">sederhana · bermakna · bersama</div></div><span className="sparkle sparkle-one">✳</span><span className="sparkle sparkle-two">✳</span><span className="art-flower">✿</span></div>
+        <div className="hero-art"><div className="art-frame"><div className="art-blob"/><img className="hero-mark" src={logoArch} alt="Anak kecil dan rusa di bawah lengkung daun" width="230" height="210" /><div className="art-caption">sederhana · bermakna · bersama</div></div><span className="sparkle sparkle-one"><Spark/></span><span className="sparkle sparkle-two"><Spark/></span><span className="art-flower">✿</span></div>
       </section>
 
-      <section className="values-strip"><a className="value-link" href="#/nilai/ikuti-ritme-anak"><span className="value-icon"><Heart size={17}/></span><span>Ikuti ritme anak</span></a><span className="value-separator">✳</span><a className="value-link" href="#/nilai/pakai-yang-ada-di-rumah"><span className="value-icon"><Leaf size={17}/></span><span>Pakai yang ada di rumah</span></a><span className="value-separator">✳</span><a className="value-link" href="#/nilai/proses-lebih-berarti"><span className="value-icon"><Sparkles size={17}/></span><span>Proses lebih berarti dari hasil</span></a></section>
+      <section className="values-strip"><a className="value-link" href="#/nilai/ikuti-ritme-anak"><span className="value-icon"><Heart size={17}/></span><span>Ikuti ritme anak</span></a><span className="value-separator"><Spark/></span><a className="value-link" href="#/nilai/pakai-yang-ada-di-rumah"><span className="value-icon"><Leaf size={17}/></span><span>Pakai yang ada di rumah</span></a><span className="value-separator"><Spark/></span><a className="value-link" href="#/nilai/proses-lebih-berarti"><span className="value-icon"><Sparkles size={17}/></span><span>Proses lebih berarti dari hasil</span></a></section>
 
       <section className="activities section-wrap" id="aktivitas"><div className="section-heading"><div><div className="eyebrow">IDE KECIL, MAKNA BESAR</div><h2>Mulai dari yang <em>sederhana.</em></h2><p>Pilih satu kegiatan, siapkan bersama, lalu nikmati prosesnya.</p></div><span className="activity-count">{activities.length} ide untuk dicoba <span>↘</span></span></div>
-        <div className="filters collections" aria-label="Koleksi"><span className="filters-label">Koleksi</span><a className="filter" href="#/memasak">Memasak bersama anak ({activities.filter((item) => item.collections?.includes('memasak')).length})</a><a className="filter" href="#/playdate">Panduan playdate</a></div>
-        <div className="filters" aria-label="Kategori aktivitas"><a className="filter active" href="#/semua">Semua ({activities.length})</a>{categories.filter((category) => category !== 'Semua').map((category) => <a key={category} className="filter" href={`#/kategori/${slugify(category)}`}>{category}</a>)}</div>
+        <div className="filter-groups">
+          <div className="filters collections" aria-label="Koleksi"><span className="filters-label">Koleksi</span><a className="filter" href="#/memasak">Memasak bersama anak ({activities.filter((item) => item.collections?.includes('memasak')).length})</a><a className="filter" href="#/playdate">Panduan playdate</a></div>
+          <div className="filters" aria-label="Kategori aktivitas"><span className="filters-label">Kategori</span><a className="filter active" href="#/semua">Semua ({activities.length})</a>{categories.filter((category) => category !== 'Semua').map((category) => <a key={category} className="filter" href={`#/kategori/${slugify(category)}`}>{category}</a>)}</div>
+        </div>
         <div className="activity-grid">{activities.slice(0, 8).map((activity, index) => <ActivityCard key={activity.title} activity={activity} index={index} saved={saved} onToggle={toggleSaved} />)}</div>
         <div className="see-all"><a className="button-primary" href="#/semua">Lihat semua {activities.length} ide <ArrowRight size={16}/></a></div>
       </section>
 
       <section className="philosophy" id="filosofi"><div className="philosophy-inner"><div className="philosophy-art"><div className="quote-mark">“</div><img className="deer-logo" src={logoScene} alt="Anak kecil memberi daun kepada seekor rusa" /><div className="leaf-doodle">✿</div><span className="philosophy-sticker">belajar<br/>dengan hati</span></div><div className="philosophy-copy"><div className="eyebrow">SEBUAH CARA PANDANG</div><h2>Anak bukan wadah kosong.<br/>Mereka <em>penjelajah kecil.</em></h2><p>Montessori adalah pendekatan belajar yang menghormati rasa ingin tahu dan kemandirian anak. Kita menyiapkan lingkungan, memberi ruang untuk mencoba, lalu hadir untuk menemani.</p><p className="philosophy-note">Tak perlu alat khusus atau jadwal yang kaku. Benda sehari-hari dan waktu bersama sudah cukup untuk memulai.</p><div className="philosophy-links"><a className="text-link" href="#/montessori">Pelajari tentang Montessori <ArrowRight size={15}/></a><a className="text-link" href="#aktivitas">Temukan kegiatan pertama <ArrowRight size={15}/></a></div></div></div></section>
 
-      <section className="printable section-wrap" id="printable"><div className="printable-copy"><div className="eyebrow">UNTUK DICETAK, UNTUK DICOBA</div><h2>Rencana kecil untuk<br/><em>hari yang penuh rasa.</em></h2><p>Pratinjau lembar ide aktivitas sederhana. Simpan halaman ini sebagai PDF dari browser, atau cetak langsung.</p><button className="button-primary print-button" onClick={() => window.print()}>Cetak pratinjau <ArrowRight size={17}/></button></div><div className="paper-wrap"><div className="paper"><div className="paper-top"><div className="paper-logo"><img className="deer-logo" src={logoScene} alt="" /></div><span>RUANG RASA <i>·</i> LEMBAR KEGIATAN</span></div><div className="paper-title">Hari ini, kita mencoba…</div><div className="paper-activity"><div className="paper-num">01</div><div><strong>Memindahkan kacang</strong><small>Pindahkan dengan sendok, pelan-pelan.</small></div><span className="check-box"/></div><div className="paper-activity"><div className="paper-num">02</div><div><strong>Mencuci daun</strong><small>Rasakan tekstur dan percikan air.</small></div><span className="check-box"/></div><div className="paper-activity"><div className="paper-num">03</div><div><strong>Waktu membaca bersama</strong><small>Ikuti cerita ke mana pun arahnya.</small></div><span className="check-box"/></div><div className="paper-reflect"><span>Setelah mencoba, aku merasa…</span><div className="writing-line"/><div className="writing-line"/></div><div className="paper-footer"><span>Tak harus sempurna. Cukup hadir bersama.</span><span>ruang rasa <i>✿</i></span></div></div><div className="paper-deco">✳</div></div></section>
+      <Planner plan={plan} setPlan={setPlan} saved={saved} />
 
       <section className="closing"><div className="closing-flower">✿</div><div className="eyebrow">TIDAK TERBURU-BURU</div><h2>Tumbuh itu bukan lomba.<br/><em>Hari ini, hadir saja.</em></h2><p>Satu momen kecil bersama sudah berarti banyak.</p><a className="button-light" href="#aktivitas">Pilih aktivitas hari ini <ArrowRight size={16}/></a></section>
     </main>
@@ -185,8 +250,17 @@ function Home({ saved, toggleSaved }) {
 
 function App() {
   const [saved, setSaved] = React.useState([])
+  const [plan, setPlan] = React.useState(loadPlan)
+  const [menuOpen, setMenuOpen] = React.useState(false)
   const { route, hash } = useRoute()
   const previousPage = React.useRef(route.page)
+
+  React.useEffect(() => { try { window.localStorage.setItem(PLAN_KEY, JSON.stringify(plan)) } catch (error) { /* penyimpanan tidak tersedia */ } }, [plan])
+  React.useEffect(() => { setMenuOpen(false) }, [hash])
+
+  function togglePlan(slug) {
+    setPlan((current) => current.slugs.includes(slug) ? { ...current, slugs: current.slugs.filter((item) => item !== slug) } : current.slugs.length >= MAX_PLAN ? current : { ...current, slugs: [...current.slugs, slug] })
+  }
 
   function toggleSaved(title) {
     setSaved((current) => current.includes(title) ? current.filter((item) => item !== title) : [...current, title])
@@ -200,20 +274,21 @@ function App() {
     previousPage.current = route.page
   }, [route.page, route.name, route.slug, route.id, hash])
 
-  let page = <Home saved={saved} toggleSaved={toggleSaved} />
+  let page = <Home saved={saved} toggleSaved={toggleSaved} plan={plan} setPlan={setPlan} />
   if (route.page === 'kategori') page = <SubPage eyebrow="KATEGORI" title={route.name} intro={categoryInfo[route.name].intro} pointsTitle="CATATAN KECIL" points={categoryInfo[route.name].tips} items={activities.filter((item) => item.category === route.name)} sheets={printables.filter((item) => item.category === route.name)} saved={saved} onToggle={toggleSaved} />
   if (route.page === 'montessori') page = <MontessoriPage />
   if (route.page === 'usia') page = <AgePage stage={stageBySlug[route.slug]} saved={saved} onToggle={toggleSaved} />
   if (route.page === 'playdate') page = <PlaydatePage />
   if (route.page === 'memasak') page = <SubPage eyebrow="KOLEKSI" title="Memasak bersama anak" intro="Dapur adalah ruang belajar yang nyata: anak berhitung, menakar, mengikuti langkah, dan mencoba rasa baru. Pilih satu resep sederhana dan bagi tugas sesuai kemampuan anak." pointsTitle="SEBELUM MULAI" points={['Cuci tangan dengan sabun sebelum dan sesudah memasak, dan kenakan celemek.', 'Bagi tugas sesuai kemampuan: anak mencuci, mengaduk, menuang, dan menata. Kompor, oven, pisau tajam, dan blender hanya untuk orang dewasa.', 'Tanyakan lebih dulu soal alergi (telur, susu, gluten, kacang) pada anak yang ikut makan.', 'Madu tidak untuk anak di bawah 1 tahun.', 'Biarkan berantakan sedikit. Prosesnya lebih penting daripada hasilnya.']} items={activities.filter((item) => item.collections?.includes('memasak'))} sheets={['kartu-makanan', 'utuh-dan-potong'].map((id) => printableById[id])} saved={saved} onToggle={toggleSaved} />
   if (route.page === 'semua') page = <AllPage saved={saved} onToggle={toggleSaved} />
-  if (route.page === 'aktivitas') page = <ActivityPage activity={activityBySlug[route.slug]} saved={saved} onToggle={toggleSaved} />
+  if (route.page === 'aktivitas') page = <ActivityPage activity={activityBySlug[route.slug]} saved={saved} onToggle={toggleSaved} plan={plan} onTogglePlan={togglePlan} />
   if (route.page === 'cetak') page = <PrintPage item={printableById[route.id]} />
-  if (route.page === 'nilai') { const value = values[route.slug]; page = <SubPage eyebrow="PRINSIP KAMI" title={value.title} intro={value.intro} pointsTitle="CARA MEMULAINYA" points={value.points} items={value.related.map((title) => activities.find((item) => item.title === title))} saved={saved} onToggle={toggleSaved} /> }
+  if (route.page === 'nilai') { const article = articleBySlug[route.slug]; page = <ArticlePage article={article}><section className="art-section"><div className="section-heading"><div><h2>Aktivitas untuk dicoba</h2><p>Ide yang sejalan dengan artikel ini.</p></div></div><div className="activity-grid">{article.related.map((slug, index) => <ActivityCard key={slug} activity={activityBySlug[slug]} index={index} saved={saved} onToggle={toggleSaved} />)}</div></section></ArticlePage> }
 
   return <>
     <header className="site-header"><a className="brand" href="#beranda"><img className="brand-logo" src={logoHorizontal} alt="Ruang Rasa" width="150" height="47" /></a>
-      <nav><a href="#aktivitas">Aktivitas</a><a href="#/montessori">Tentang Montessori</a><a href="#printable">Printable</a></nav><a className="header-cta" href="#aktivitas">Temukan ide <ArrowRight size={15}/></a>
+      <nav id="menu-utama" className={menuOpen ? 'open' : ''} aria-label="Menu utama"><a href="#aktivitas">Aktivitas</a><a href="#/semua" className="nav-extra">Semua ide</a><a href="#/montessori">Tentang Montessori</a><a href="#/playdate" className="nav-extra">Panduan playdate</a><a href="#printable">Printable</a></nav>
+      <div className="header-right"><a className="header-cta" href="#aktivitas">Temukan ide <ArrowRight size={15}/></a><button type="button" className="menu-toggle" aria-label={menuOpen ? 'Tutup menu' : 'Buka menu'} aria-expanded={menuOpen} aria-controls="menu-utama" onClick={() => setMenuOpen((value) => !value)}>{menuOpen ? <X size={20}/> : <Menu size={20}/>}</button></div>
     </header>
 
     {page}

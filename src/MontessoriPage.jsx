@@ -65,7 +65,7 @@ const domainOf = (url) => new URL(url).hostname.replace(/^www\./, '')
 const sourceLabel = (id) => { const item = sources.find((entry) => entry.n === id); return item ? `${item.org}, ${item.title}` : '' }
 
 // Hash URL dipakai untuk routing, jadi rujukan menggulir ke sumber lewat JavaScript (tanpa mengubah hash).
-function goToSource(event, id) {
+export function goToSource(event, id) {
   event.preventDefault()
   const el = document.getElementById(`sumber-${id}`)
   if (!el) return
@@ -74,7 +74,7 @@ function goToSource(event, id) {
   setTimeout(() => el.classList.remove('mt-flash'), 1800)
 }
 
-function backToText(n) {
+export function backToText(n) {
   const el = document.querySelector(`[data-cite="${n}"]`)
   if (!el) return
   el.scrollIntoView({ behavior: 'smooth', block: 'center' })

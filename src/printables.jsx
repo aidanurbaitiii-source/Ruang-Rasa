@@ -274,13 +274,13 @@ function jiplakHuruf() {
 }
 
 function kartuHuruf() {
-  const cards = [['A', 'apel', '🍎'], ['B', 'bola', '⚽'], ['C', 'cicak', '🦎'], ['D', 'domba', '🐑'], ['E', 'es krim', '🍦'], ['F', 'foto', '📷'], ['G', 'gajah', '🐘'], ['H', 'harimau', '🐯'], ['I', 'ikan', '🐟'], ['J', 'jeruk', '🍊'], ['K', 'kucing', '🐱'], ['L', 'lebah', '🐝'], ['M', 'mangga', '🥭'], ['N', 'nanas', '🍍'], ['O', 'orang utan', '🦧'], ['P', 'pisang', '🍌'], ['R', 'rumah', '🏠'], ['S', 'sapi', '🐄'], ['T', 'topi', '🎩'], ['U', 'ular', '🐍'], ['V', 'vas bunga', '🏺'], ['W', 'wajan', '🍳'], ['Y', 'yoyo', '🪀'], ['Z', 'zebra', '🦓']]
-  return chunk(cards, 8).map((group, p) => <Page key={p} name={false} title="Kartu huruf: A untuk apel…" lines={['Gunting kartunya. Sebutkan bunyi huruf, lihat gambarnya, lalu baca katanya bersama.', 'Huruf Q dan X dilewati karena jarang dipakai di awal kata bahasa Indonesia.']}>
+  const cards = [['A', 'apel', '🍎'], ['B', 'bola', '⚽'], ['C', 'cicak', '🦎'], ['D', 'domba', '🐑'], ['E', 'es krim', '🍦'], ['F', 'foto', '📷'], ['G', 'gajah', '🐘'], ['H', 'harimau', '🐯'], ['I', 'ikan', '🐟'], ['J', 'jeruk', '🍊'], ['K', 'kucing', '🐱'], ['L', 'lebah', '🐝'], ['M', 'mangga', '🥭'], ['N', 'nanas', '🍍'], ['O', 'orang utan', '🦧'], ['P', 'pisang', '🍌'], ['Q', 'queen (ratu)', '👑'], ['R', 'rumah', '🏠'], ['S', 'sapi', '🐄'], ['T', 'topi', '🎩'], ['U', 'ular', '🐍'], ['V', 'vas bunga', '🏺'], ['W', 'wajan', '🍳'], ['X', 'xilofon', '🎹'], ['Y', 'yoyo', '🪀'], ['Z', 'zebra', '🦓']]
+  return chunk(cards, 8).map((group, p) => <Page key={p} name={false} title="Kartu huruf: A untuk apel…" lines={['Gunting kartunya. Sebutkan bunyi huruf, lihat gambarnya, lalu baca katanya bersama.']}>
     {group.map(([l, w, e], i) => {
       const x = 12 + (i % 2) * 98, y = 50 + Math.floor(i / 2) * 58
       return <CutCard key={l} x={x} y={y} w={88} h={52}>
         <text x={x + 8} y={y + 33} className="s-letter" fill={OLIVE}>{l}<tspan fill={TERRA}>{l.toLowerCase()}</tspan></text>
-        <text x={x + 56} y={y + 28} className="s-emoji" textAnchor="middle" dominantBaseline="central">{e}</text>
+        <text x={x + 65} y={y + 28} className="s-emoji" textAnchor="middle" dominantBaseline="central">{e}</text>
         <text x={x + 44} y={y + 47} className="s-word" textAnchor="middle">{w}</text>
       </CutCard>
     })}

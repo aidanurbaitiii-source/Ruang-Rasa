@@ -1,5 +1,7 @@
 import React from 'react'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { activities } from './activities.js'
+import { stages, stageIncludes } from './stages.js'
 
 // Isi halaman "Apa itu Montessori?". Setiap klaim faktual harus punya rujukan di daftar `sources`.
 
@@ -21,13 +23,6 @@ const ideas = [
   { title: 'Orang dewasa sebagai pemandu', text: 'Tugas utama pemandu (guru atau orang tua) adalah mengamati, menyiapkan lingkungan, dan memperkenalkan kegiatan baru ketika anak sudah siap dan tertarik, bukan mengajar semuanya lewat ceramah.', ref: [8] },
 ]
 
-const planes = [
-  { age: '0–6 tahun', name: 'Pikiran yang menyerap', note: 'Anak belajar lewat indra dan gerak, serta berkembang pesat dalam bahasa dan kemandirian.' },
-  { age: '6–12 tahun', name: 'Pikiran yang bernalar', note: 'Anak mulai beralih dari hal konkret ke hal abstrak, dan semakin ingin tahu tentang dunia.' },
-  { age: '12–18 tahun', name: 'Masa remaja', note: 'Tahap perubahan besar menuju kedewasaan.' },
-  { age: '18–24 tahun', name: 'Dewasa muda', note: 'Tahap konsolidasi sebelum dewasa penuh.' },
-]
-
 const areas = [
   { name: 'Kehidupan praktis', text: 'Kegiatan sehari-hari seperti menuang, memindahkan, dan merawat diri serta lingkungan. Melatih koordinasi, konsentrasi, dan kemandirian.', link: '#/kategori/kehidupan-praktis' },
   { name: 'Sensorial', text: 'Mengasah indra lewat warna, tekstur, ukuran, dan bentuk. Menyiapkan anak untuk matematika dan bahasa.', link: '#/kategori/sensorial' },
@@ -44,20 +39,30 @@ const homeTips = [
   'Tidak perlu perabot atau alat mahal. Yang terpenting adalah menyiapkan rumah agar sesuai dengan cara anak belajar.',
 ]
 
-const sources = [
-  { n: 1, title: 'Britannica: Maria Montessori', url: 'https://www.britannica.com/biography/Maria-Montessori' },
-  { n: 2, title: 'Wikipedia: Maria Montessori', url: 'https://en.wikipedia.org/wiki/Maria_Montessori' },
-  { n: 3, title: 'Montessori Australia: Biography of Dr. Maria Montessori', url: 'https://montessori.org.au/node/4604' },
-  { n: 4, title: 'Association Montessori Internationale (AMI): Four Planes of Development', url: 'https://archives.montessori-ami.org/help/glossary/four-planes-development' },
-  { n: 5, title: 'Montessori Academy Australia: Montessori principles in education', url: 'https://montessoriacademy.com.au/montessori-education/montessori-principles-education/' },
-  { n: 6, title: 'American Montessori Society (AMS): 5 Core Components of Montessori Education', url: 'https://amshq.org/corecomponents' },
-  { n: 7, title: 'Wikipedia: Montessori in the United States (status nama "Montessori")', url: 'https://en.wikipedia.org/wiki/Montessori_in_the_United_States' },
-  { n: 8, title: 'Montessori Academy Australia: Montessori guides, peran orang tua', url: 'https://montessoriacademy.com.au/montessori-at-home/getting-started/parent-as-montessori-guide/' },
-  { n: 9, title: 'Lillard, A. S. & Else-Quest, N. (2006). Evaluating Montessori Education. Science', url: 'https://pcl.sitehost.iu.edu/rgoldsto/courses/cogscilearning/montessorieval.pdf' },
-  { n: 10, title: 'Marshall, C. (2017). Montessori education: a review of the evidence base. npj Science of Learning', url: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6161506/' },
-  { n: 11, title: 'Cornell University: What the Evidence Says About Montessori Education', url: 'https://evidencebasedliving.human.cornell.edu/uncategorized/what-the-evidence-says-about-montessori-education' },
-  { n: 12, title: 'Agapedia (UPI): Penerapan Pendekatan Montessori dalam PAUD di Indonesia, Tantangan dan Peluang', url: 'https://ejournal.upi.edu/index.php/agapedia/article/view/85925' },
+export const sources = [
+  { n: 1, type: 'Ensiklopedia', org: 'Encyclopaedia Britannica', title: 'Maria Montessori', url: 'https://www.britannica.com/biography/Maria-Montessori' },
+  { n: 2, type: 'Ensiklopedia daring', org: 'Wikipedia', title: 'Maria Montessori', url: 'https://en.wikipedia.org/wiki/Maria_Montessori' },
+  { n: 3, type: 'Organisasi Montessori', org: 'Montessori Australia', title: 'Biography of Dr. Maria Montessori', url: 'https://montessori.org.au/node/4604' },
+  { n: 4, type: 'Organisasi Montessori', org: 'Association Montessori Internationale (AMI)', title: 'Four Planes of Development', url: 'https://archives.montessori-ami.org/help/glossary/four-planes-development' },
+  { n: 5, type: 'Lembaga pendidikan', org: 'Montessori Academy Australia', title: 'Montessori principles in education', url: 'https://montessoriacademy.com.au/montessori-education/montessori-principles-education/' },
+  { n: 6, type: 'Organisasi Montessori', org: 'American Montessori Society (AMS)', title: '5 Core Components of Montessori Education', url: 'https://amshq.org/corecomponents' },
+  { n: 7, type: 'Ensiklopedia daring', org: 'Wikipedia', title: 'Montessori in the United States', url: 'https://en.wikipedia.org/wiki/Montessori_in_the_United_States' },
+  { n: 8, type: 'Lembaga pendidikan', org: 'Montessori Academy Australia', title: 'Montessori Guides: Parents\u2019 Role in Fostering Independence', url: 'https://montessoriacademy.com.au/montessori-at-home/getting-started/parent-as-montessori-guide/' },
+  { n: 9, type: 'Jurnal ilmiah', org: 'Lillard, A. S., & Else-Quest, N.', year: 2006, title: 'Evaluating Montessori Education', venue: 'Science', url: 'https://pcl.sitehost.iu.edu/rgoldsto/courses/cogscilearning/montessorieval.pdf' },
+  { n: 10, type: 'Jurnal ilmiah', org: 'Marshall, C.', year: 2017, title: 'Montessori education: a review of the evidence base', venue: 'npj Science of Learning', url: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6161506/' },
+  { n: 11, type: 'Universitas', org: 'Cornell University', title: 'What the Evidence Says About Montessori Education', url: 'https://evidencebasedliving.human.cornell.edu/uncategorized/what-the-evidence-says-about-montessori-education' },
+  { n: 13, type: 'Organisasi pendidikan', org: 'Montessori Public', year: 2022, title: 'Erdkinder in public Montessori schools', url: 'https://www.montessoripublic.org/2022/05/erdkinder-in-public-montessori-schools/' },
+  { n: 14, type: 'Organisasi Montessori', org: 'Association Montessori Internationale (AMI)', title: 'Four Planes of Development: Fourth Plane', url: 'https://archives.montessori-ami.org/help/glossary/four-planes-development-fourth-plane' },
+  { n: 15, type: 'Artikel esai', org: 'Wolff, P., & Seldin, T.', year: 2019, title: 'The needs of the fourth plane of development', venue: 'Montessori Post', url: 'https://www.montessoripost.com/2019/12/01/the-needs-of-the-fourth-plane-of-development/' },
+  { n: 16, type: 'Ensiklopedia daring', org: 'Wikipedia', title: 'Erdkinder', url: 'https://en.wikipedia.org/wiki/Erdkinder' },
+  { n: 17, type: 'Organisasi Montessori', org: 'Association Montessori Internationale (AMI)', title: 'Four Planes of Development: Second Plane', url: 'https://archives.montessori-ami.org/help/glossary/four-planes-development-second-plane' },
+  { n: 12, type: 'Jurnal ilmiah', org: 'Jurnal Agapedia (Universitas Pendidikan Indonesia)', title: 'Penerapan Pendekatan Montessori dalam Pendidikan Anak Usia Dini di Indonesia: Tantangan dan Peluang', url: 'https://ejournal.upi.edu/index.php/agapedia/article/view/85925' },
 ]
+
+sources.sort((a, b) => a.n - b.n)
+
+const domainOf = (url) => new URL(url).hostname.replace(/^www\./, '')
+const sourceLabel = (id) => { const item = sources.find((entry) => entry.n === id); return item ? `${item.org}, ${item.title}` : '' }
 
 // Hash URL dipakai untuk routing, jadi rujukan menggulir ke sumber lewat JavaScript (tanpa mengubah hash).
 function goToSource(event, id) {
@@ -69,7 +74,27 @@ function goToSource(event, id) {
   setTimeout(() => el.classList.remove('mt-flash'), 1800)
 }
 
-const Ref = ({ ids }) => <sup className="mt-ref">{ids.map((id, i) => <React.Fragment key={id}>{i > 0 && ','}<a href={`#sumber-${id}`} onClick={(event) => goToSource(event, id)} aria-label={`Sumber ${id}`}>{id}</a></React.Fragment>)}</sup>
+function backToText(n) {
+  const el = document.querySelector(`[data-cite="${n}"]`)
+  if (!el) return
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  el.classList.add('mt-flash-cite')
+  setTimeout(() => el.classList.remove('mt-flash-cite'), 1800)
+}
+
+export const Ref = ({ ids }) => <sup className="mt-ref">[{ids.map((id, i) => <React.Fragment key={id}>{i > 0 && ', '}<a href={`#sumber-${id}`} data-cite={id} data-tip={sourceLabel(id)} onClick={(event) => goToSource(event, id)} aria-label={`Sumber ${id}: ${sourceLabel(id)}`}>{id}</a></React.Fragment>)}]</sup>
+
+export function SourceList({ ids }) {
+  const list = ids ? sources.filter((item) => ids.includes(item.n)) : sources
+  const [cited, setCited] = React.useState(null)
+  React.useEffect(() => { setCited(new Set([...document.querySelectorAll('[data-cite]')].map((el) => Number(el.getAttribute('data-cite'))))) }, [])
+  return <ol className="mt-sources">{list.map((item) => <li key={item.n} id={`sumber-${item.n}`}>
+    <div className="src-body">
+      <span className="src-cite">{item.org}{item.year ? ` (${item.year})` : ''}. <a href={item.url} target="_blank" rel="noreferrer noopener"><em>{item.title}</em></a>{item.venue ? <>. {item.venue}</> : null}.</span>
+      <span className="src-meta">{item.type} · {domainOf(item.url)} · Diakses Oktober 2026{cited && cited.has(item.n) ? <> · <button type="button" className="src-back" onClick={() => backToText(item.n)}>↑ Kembali ke teks</button></> : null}</span>
+    </div>
+  </li>)}</ol>
+}
 
 export default function MontessoriPage() {
   return <main className="subpage montessori-page section-wrap">
@@ -97,7 +122,8 @@ export default function MontessoriPage() {
     <section>
       <h2>Empat tahap perkembangan</h2>
       <p className="mt-lead">Montessori membagi perkembangan manusia menjadi empat tahap yang masing-masing berlangsung sekitar enam tahun.<Ref ids={[4]} /> Ruang Rasa berada di tahap pertama.</p>
-      <div className="mt-planes">{planes.map((item) => <div key={item.age} className="mt-plane"><strong>{item.age}</strong><span className="mt-plane-name">{item.name}</span><p>{item.note}</p></div>)}</div>
+      <p className="mt-lead">Pada tahap usia sekolah (6–12 tahun), pendidikan Montessori menekankan imajinasi, rasa ingin tahu intelektual, dan kemampuan sosial.<Ref ids={[17]} /> Untuk tahap remaja, Montessori mengusulkan Erdkinder ("anak-anak tanah"): belajar lewat kerja nyata di lahan dan komunitas.<Ref ids={[13, 16]} /> Tahap dewasa muda digambarkan sebagai masa memantapkan identitas dan mencari kontribusi yang bermakna bagi masyarakat.<Ref ids={[14]} /> Montessori sendiri menulis relatif sedikit tentang tahap ini, sehingga banyak penjelasannya berasal dari tafsir pendidik sesudahnya.<Ref ids={[15]} /></p>
+      <div className="mt-planes">{stages.map((item) => { const count = activities.filter((activity) => stageIncludes(item, activity.age)).length; return <a key={item.slug} href={`#/usia/${item.slug}`} className="mt-plane"><strong>{item.age}</strong><span className="mt-plane-name">{item.name}</span><p>{item.note}</p><span className="mt-plane-link">{count > 0 ? `${count} aktivitas` : 'Segera hadir'} <ArrowRight size={13}/></span></a> })}</div>
     </section>
 
     <section>
@@ -125,7 +151,7 @@ export default function MontessoriPage() {
 
     <section>
       <h2>Sumber</h2>
-      <ol className="mt-sources">{sources.map((item) => <li key={item.n} id={`sumber-${item.n}`}><a href={item.url} target="_blank" rel="noreferrer">{item.title}</a></li>)}</ol>
+      <SourceList />
       <p className="source-note">Ringkasan ini disusun tim Ruang Rasa dari sumber-sumber di atas dan terakhir ditinjau pada Oktober 2026. Untuk istilah atau kebijakan resmi, rujuklah langsung situs organisasi Montessori terkait.</p>
     </section>
   </main>

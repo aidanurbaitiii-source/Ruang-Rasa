@@ -6,7 +6,9 @@ import logoArch from './assets/logo/logo-arch.svg'
 import logoScene from './assets/logo/logo-scene.svg'
 import { printables, printableById, pageCount, PrintSheets } from './printables.jsx'
 import { activities, activityBySlug } from './activities.js'
-import MontessoriPage from './MontessoriPage.jsx'
+import MontessoriPage, { Ref, SourceList } from './MontessoriPage.jsx'
+import { references } from './references.js'
+import { stages, stageBySlug, stageIncludes, stageForAge } from './stages.js'
 import PlaydatePage from './PlaydatePage.jsx'
 import './styles.css'
 
@@ -39,8 +41,9 @@ function parseRoute(hash) {
   if (hash === '#/playdate') return { page: 'playdate' }
   if (hash === '#/montessori') return { page: 'montessori' }
   if (hash === '#/semua') return { page: 'semua' }
-  const m = hash.match(/^#\/(kategori|nilai|cetak|aktivitas)\/([a-z0-9-]+)$/)
+  const m = hash.match(/^#\/(kategori|nilai|cetak|aktivitas|usia)\/([a-z0-9-]+)$/)
   if (!m) return { page: 'home' }
+  if (m[1] === 'usia') return stageBySlug[m[2]] ? { page: 'usia', slug: m[2] } : { page: 'home' }
   if (m[1] === 'aktivitas') return activityBySlug[m[2]] ? { page: 'aktivitas', slug: m[2] } : { page: 'home' }
   if (m[1] === 'cetak') return printableById[m[2]] ? { page: 'cetak', id: m[2] } : { page: 'home' }
   if (m[1] === 'kategori') { const name = categories.find((c) => c !== 'Semua' && slugify(c) === m[2]); return name ? { page: 'kategori', name } : { page: 'home' } }
@@ -55,14 +58,18 @@ function useRoute() {
 
 function ActivityPage({ activity, saved, onToggle }) {
   const sheets = activity.printables.map((id) => printableById[id]).filter(Boolean)
-  const others = activities.filter((item) => item.category === activity.category && item.slug !== activity.slug).slice(0, 3)
+  const stage = stageForAge(activity.age)
+  const sameCategory = activities.filter((item) => item.category === activity.category && item.slug !== activity.slug)
+  // Utamakan ide pada rentang usia yang sama (kategori yang sama lebih dulu), baru kategori yang sama di rentang usia lain.
+  const sameStage = stage ? activities.filter((item) => item.slug !== activity.slug && stageIncludes(stage, item.age)).sort((a, b) => Number(b.category === activity.category) - Number(a.category === activity.category)) : sameCategory
+  const others = (sameStage.length > 0 ? sameStage : sameCategory).slice(0, 3)
   const isSaved = saved.includes(activity.title)
   const { photo } = activity
   return <main className="subpage activity-page section-wrap">
     <a className="back-link" href={`#/kategori/${slugify(activity.category)}`}><ArrowLeft size={15}/> {activity.category}</a>
     <div className="activity-head">
       <div><div className="eyebrow">{activity.category.toUpperCase()}</div><h1>{activity.title}</h1><p className="subpage-intro">{activity.intro}</p>
-        <div className="activity-chips"><span>{activity.age}</span><span><Clock3 size={14}/> {activity.time}</span>{activity.mess && <span>Berantakan: {activity.mess}</span>}<button className={isSaved ? 'chip-button saved' : 'chip-button'} onClick={() => onToggle(activity.title)}><Heart size={14} fill={isSaved ? 'currentColor' : 'none'}/> {isSaved ? 'Tersimpan' : 'Simpan'}</button></div></div>
+        <div className="activity-chips">{stageForAge(activity.age) ? <a className="chip-link" href={`#/usia/${stageForAge(activity.age).slug}`}>{activity.age} <ArrowRight size={12}/></a> : <span>{activity.age}</span>}<span><Clock3 size={14}/> {activity.time}</span>{activity.mess && <span>Berantakan: {activity.mess}</span>}<button className={isSaved ? 'chip-button saved' : 'chip-button'} onClick={() => onToggle(activity.title)}><Heart size={14} fill={isSaved ? 'currentColor' : 'none'}/> {isSaved ? 'Tersimpan' : 'Simpan'}</button></div></div>
       <div className={`card-art activity-hero ${activity.color}`}><span>{activity.icon}</span></div>
     </div>
     <div className="activity-layout">
@@ -79,8 +86,12 @@ function ActivityPage({ activity, saved, onToggle }) {
         {sheets.length > 0 && <div className="side-card"><h3>Lembar pendukung</h3><ul className="side-links">{sheets.map((sheet) => <li key={sheet.id}><a href={`#/cetak/${sheet.id}`}><Printer size={13}/> {sheet.title}</a></li>)}</ul></div>}
       </aside>
     </div>
-    <p className="source-note">{activity.source ? <>Ide ini terinspirasi dari buku <em>{activity.source.title}</em> oleh {activity.source.authors}, penerbit {activity.source.publisher}. Langkah dan penjelasan ditulis ulang oleh tim Ruang Rasa dan disesuaikan untuk anak usia 2–5 tahun.</> : <>Ide ini disusun tim Ruang Rasa sebagai ringkasan praktik Montessori yang umum dipakai di rumah. Sesuaikan dengan kesiapan dan minat anakmu.</>}</p>
-    {others.length > 0 && <><div className="section-heading section-gap"><div><h2>Ide lain di {activity.category}</h2></div></div><div className="activity-grid">{others.map((item, index) => <ActivityCard key={item.slug} activity={item} index={index} saved={saved} onToggle={onToggle} />)}</div></>}
+    {activity.refs && <section className="activity-refs"><h2>Referensi</h2>
+      <ol className="mt-sources">{activity.refs.map((key) => { const item = references[key]; return item ? <li key={key}><div className="src-body"><span className="src-cite">{item.org}{item.year ? ` (${item.year})` : ''}. <a href={item.url} target="_blank" rel="noreferrer noopener"><em>{item.title}</em></a>{item.venue ? <>. {item.venue}</> : null}.</span><span className="src-meta">{item.type} · {new URL(item.url).hostname.replace(/^www\./, '')} · Diakses Oktober 2026</span></div></li> : null })}</ol>
+      {activity.evidence && <p className="evidence-note"><strong>Catatan bukti.</strong> {activity.evidence}</p>}
+    </section>}
+    <p className="source-note">{activity.source ? <>Ide ini terinspirasi dari buku <em>{activity.source.title}</em> oleh {activity.source.authors}, penerbit {activity.source.publisher}. Langkah dan penjelasan ditulis ulang oleh tim Ruang Rasa dan disesuaikan untuk anak usia 2–5 tahun.</> : <>{activity.refs ? 'Ide ini disusun tim Ruang Rasa berdasarkan referensi di atas. Sesuaikan dengan kesiapan, minat, dan kondisi anakmu.' : 'Ide ini disusun tim Ruang Rasa sebagai ringkasan praktik Montessori yang umum dipakai di rumah. Sesuaikan dengan kesiapan dan minat anakmu.'}</>}</p>
+    {others.length > 0 && <><div className="section-heading section-gap"><div><h2>{others.every((item) => item.category === activity.category) ? `Ide lain di ${activity.category}` : `Ide lain untuk usia ${stage ? stage.age : 'ini'}`}</h2></div></div><div className="activity-grid">{others.map((item, index) => <ActivityCard key={item.slug} activity={item} index={index} saved={saved} onToggle={onToggle} />)}</div></>}
   </main>
 }
 
@@ -91,10 +102,32 @@ function AllPage({ saved, onToggle }) {
     <p className="subpage-intro">{activities.length} ide kegiatan sederhana dengan bahan sehari-hari, dikelompokkan menurut kategori. Pilih satu, siapkan bersama, lalu nikmati prosesnya.</p>
     <div className="filters collections"><span className="filters-label">Koleksi</span><a className="filter" href="#/memasak">Memasak bersama anak ({activities.filter((item) => item.collections?.includes('memasak')).length})</a><a className="filter" href="#/playdate">Panduan playdate</a></div>
     <div className="filters">{categories.filter((category) => category !== 'Semua').map((category) => <a key={category} className="filter" href={`#/kategori/${slugify(category)}`}>{category} ({activities.filter((item) => item.category === category).length})</a>)}</div>
+    <div className="filters collections"><span className="filters-label">Usia</span>{stages.map((stage) => <a key={stage.slug} className="filter" href={`#/usia/${stage.slug}`}>{stage.age} ({activities.filter((item) => stageIncludes(stage, item.age)).length})</a>)}</div>
     {categories.filter((category) => category !== 'Semua').map((category) => <section key={category}>
       <div className="section-heading section-gap"><div><h2>{category}</h2></div><a className="text-link" href={`#/kategori/${slugify(category)}`}>Halaman kategori <ArrowRight size={14}/></a></div>
       <div className="activity-grid">{activities.filter((item) => item.category === category).map((activity, index) => <ActivityCard key={activity.slug} activity={activity} index={index} saved={saved} onToggle={onToggle} />)}</div>
     </section>)}
+  </main>
+}
+
+function AgePage({ stage, saved, onToggle }) {
+  const items = activities.filter((item) => stageIncludes(stage, item.age))
+  const groups = categories.filter((category) => category !== 'Semua').map((category) => [category, items.filter((item) => item.category === category)]).filter(([, list]) => list.length > 0)
+  return <main className="subpage montessori-page section-wrap">
+    <a className="back-link" href="#/montessori"><ArrowLeft size={15}/> Apa itu Montessori?</a>
+    <div className="eyebrow">TAHAP PERKEMBANGAN</div>
+    <h1>Usia {stage.age}</h1>
+    <span className="mt-plane-name big">{stage.name}</span>
+    <p className="subpage-intro">{stage.intro}<Ref ids={stage.refs} /></p>
+    <div className="filters age-filters" aria-label="Pilih rentang usia">{stages.map((item) => <a key={item.slug} className={item.slug === stage.slug ? 'filter active' : 'filter'} href={`#/usia/${item.slug}`}>{item.age} ({activities.filter((activity) => stageIncludes(item, activity.age)).length})</a>)}</div>
+    <div className="mt-traits">{stage.traits.map((trait) => <span key={trait}>{trait}</span>)}</div>
+    {items.length === 0
+      ? <div className="empty-state"><strong>Aktivitas untuk usia ini sedang disiapkan.</strong><p>Saat ini Ruang Rasa berfokus pada anak usia 2–5 tahun, yang berada di tahap 0–6 tahun.</p><a className="button-primary" href="#/usia/0-6-tahun">Lihat aktivitas usia 0–6 tahun <ArrowRight size={16}/></a></div>
+      : groups.map(([category, list]) => <section key={category}>
+          <div className="section-heading section-gap"><div><h2>{category}</h2></div><a className="text-link" href={`#/kategori/${slugify(category)}`}>Halaman kategori <ArrowRight size={14}/></a></div>
+          <div className="activity-grid">{list.map((activity, index) => <ActivityCard key={activity.slug} activity={activity} index={index} saved={saved} onToggle={onToggle} />)}</div>
+        </section>)}
+    <section><h2>Sumber</h2><SourceList ids={stage.refs} /></section>
   </main>
 }
 
@@ -170,6 +203,7 @@ function App() {
   let page = <Home saved={saved} toggleSaved={toggleSaved} />
   if (route.page === 'kategori') page = <SubPage eyebrow="KATEGORI" title={route.name} intro={categoryInfo[route.name].intro} pointsTitle="CATATAN KECIL" points={categoryInfo[route.name].tips} items={activities.filter((item) => item.category === route.name)} sheets={printables.filter((item) => item.category === route.name)} saved={saved} onToggle={toggleSaved} />
   if (route.page === 'montessori') page = <MontessoriPage />
+  if (route.page === 'usia') page = <AgePage stage={stageBySlug[route.slug]} saved={saved} onToggle={toggleSaved} />
   if (route.page === 'playdate') page = <PlaydatePage />
   if (route.page === 'memasak') page = <SubPage eyebrow="KOLEKSI" title="Memasak bersama anak" intro="Dapur adalah ruang belajar yang nyata: anak berhitung, menakar, mengikuti langkah, dan mencoba rasa baru. Pilih satu resep sederhana dan bagi tugas sesuai kemampuan anak." pointsTitle="SEBELUM MULAI" points={['Cuci tangan dengan sabun sebelum dan sesudah memasak, dan kenakan celemek.', 'Bagi tugas sesuai kemampuan: anak mencuci, mengaduk, menuang, dan menata. Kompor, oven, pisau tajam, dan blender hanya untuk orang dewasa.', 'Tanyakan lebih dulu soal alergi (telur, susu, gluten, kacang) pada anak yang ikut makan.', 'Madu tidak untuk anak di bawah 1 tahun.', 'Biarkan berantakan sedikit. Prosesnya lebih penting daripada hasilnya.']} items={activities.filter((item) => item.collections?.includes('memasak'))} sheets={['kartu-makanan', 'utuh-dan-potong'].map((id) => printableById[id])} saved={saved} onToggle={toggleSaved} />
   if (route.page === 'semua') page = <AllPage saved={saved} onToggle={toggleSaved} />

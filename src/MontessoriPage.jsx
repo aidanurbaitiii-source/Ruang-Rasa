@@ -33,7 +33,7 @@ const areas = [
   { name: 'Sensorial', text: 'Mengasah indra lewat warna, tekstur, ukuran, dan bentuk. Menyiapkan anak untuk matematika dan bahasa.', link: '#/kategori/sensorial' },
   { name: 'Bahasa', text: 'Kemampuan berbicara menjadi dasar untuk menulis dan membaca, antara lain lewat huruf amplas dan abjad bergerak.', link: '#/kategori/bahasa' },
   { name: 'Matematika', text: 'Konsep angka dikenalkan dengan benda konkret yang bisa dipegang, mulai dari berhitung sampai operasi dasar.', link: '#/kategori/matematika' },
-  { name: 'Budaya', text: 'Geografi, sejarah, sains, alam, serta seni dan musik. Area ini belum ada di Ruang Rasa.', link: null },
+  { name: 'Budaya', text: 'Geografi, sejarah, sains, alam, serta seni dan musik. Anak mengenal dunia di sekitarnya, dari yang paling dekat.', link: '#/kategori/budaya' },
 ]
 
 const homeTips = [
@@ -102,7 +102,7 @@ export default function MontessoriPage() {
 
     <section>
       <h2>Area belajar untuk anak usia 3–6 tahun</h2>
-      <p className="mt-lead">Banyak sekolah Montessori mengelompokkan kegiatan anak prasekolah ke dalam lima area. Kategori di Ruang Rasa mengikuti pembagian ini, kecuali budaya yang belum tersedia. Sumber berbeda kadang memakai jumlah dan nama area yang sedikit berbeda.</p>
+      <p className="mt-lead">Banyak sekolah Montessori mengelompokkan kegiatan anak prasekolah ke dalam lima area. Kategori di Ruang Rasa mengikuti pembagian ini. Sumber berbeda kadang memakai jumlah dan nama area yang sedikit berbeda.</p>
       <div className="mt-areas">{areas.map((item) => <div key={item.name} className="mt-area"><h3>{item.name}</h3><p>{item.text}</p>{item.link ? <a className="text-link" href={item.link}>Lihat aktivitas <ArrowRight size={14}/></a> : <span className="mt-soon">Belum tersedia</span>}</div>)}</div>
     </section>
 

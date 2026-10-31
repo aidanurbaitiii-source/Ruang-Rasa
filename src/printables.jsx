@@ -109,13 +109,16 @@ function kartuAngka() {
 }
 
 function jepitAngka() {
-  const dotsAt = (n, x0, y0) => Array.from({ length: n }, (_, k) => <circle key={k} cx={x0 + (k % 5) * 9} cy={y0 + Math.floor(k / 5) * 9} r="3.2" fill={PALETTE[(n - 1) % 6]} stroke={OLIVE} strokeWidth=".4" />)
-  return chunk(Array.from({ length: 10 }, (_, i) => i + 1), 8).map((group, p) => <Page key={p} name={false} title="Jepit jemuran: cocokkan angka" lines={['Gunting kartunya. Anak menghitung bulatan, lalu menjepit jepit jemuran di angka yang tepat.', 'Tulis jawabannya di belakang kartu supaya anak bisa mengecek sendiri.']}>
+  const dotsAt = (n, x, y) => {
+    const big = n <= 10, gap = big ? 9 : 6.4, r = big ? 3.2 : 2.3, x0 = x + 44 - (4 * gap) / 2, y0 = y + (big ? 11 : 8)
+    return Array.from({ length: n }, (_, k) => <circle key={k} cx={x0 + (k % 5) * gap} cy={y0 + Math.floor(k / 5) * gap} r={r} fill={PALETTE[(n - 1) % 6]} stroke={OLIVE} strokeWidth=".4" />)
+  }
+  return chunk(Array.from({ length: 20 }, (_, i) => i + 1), 8).map((group, p) => <Page key={p} name={false} title={`Jepit jemuran: angka ${group[0]}–${group[group.length - 1]}`} lines={['Gunting kartunya. Anak menghitung bulatan, lalu menjepit jepit jemuran di angka yang tepat.', 'Tulis jawabannya di belakang kartu supaya anak bisa mengecek sendiri.']}>
     {group.map((n, i) => {
-      const x = 12 + (i % 2) * 98, y = 48 + Math.floor(i / 2) * 58
+      const x = 12 + (i % 2) * 98, y = 48 + Math.floor(i / 2) * 58, base = n > 10 ? 11 : 1
       return <CutCard key={n} x={x} y={y} w={88} h={52}>
-        {dotsAt(n, x + 22, y + 11)}
-        {Array.from({ length: 10 }, (_, k) => <text key={k} x={x + 8 + k * 8.0} y={y + 47} className="s-label" textAnchor="middle">{k + 1}</text>)}
+        {dotsAt(n, x, y)}
+        {Array.from({ length: 10 }, (_, k) => <text key={k} x={x + 8 + k * 8.0} y={y + 47} className="s-label" textAnchor="middle">{base + k}</text>)}
       </CutCard>
     })}
   </Page>)
@@ -136,6 +139,8 @@ function cocokkanBentuk() {
   const sets = [
     { names: ['lingkaran', 'persegi', 'segitiga', 'bintang', 'hati', 'segi enam'], order: [3, 5, 1, 0, 4, 2], step: 36, top: 62 },
     { names: ['persegi panjang', 'oval', 'belah ketupat', 'segi lima', 'bintang', 'lingkaran', 'segitiga', 'hati'], order: [4, 2, 6, 0, 7, 3, 1, 5], step: 27, top: 56 },
+    { names: ['segitiga', 'lingkaran', 'hati', 'persegi panjang', 'bintang', 'belah ketupat'], order: [2, 4, 0, 5, 1, 3], step: 36, top: 62 },
+    { names: ['segi enam', 'oval', 'persegi', 'segi lima', 'segitiga', 'hati', 'bintang', 'belah ketupat'], order: [5, 3, 7, 1, 0, 6, 2, 4], step: 27, top: 56 },
   ]
   return sets.flatMap((s, si) => [false, true].map((answer) => <MatchSheet key={`${si}${answer}`} answer={answer} rows={s.names} step={s.step} top={s.top} order={s.order}
     title={answer ? `Lembar koreksi ${si + 1}` : `Cocokkan bentuk ${si + 1}`} lines={answer ? ['Garis merah menunjukkan pasangan yang benar.'] : ['Tarik garis dari bentuk di kiri ke bentuk yang sama di kanan.']}
@@ -174,6 +179,28 @@ function rodaWarna() {
       <text x="12" y="250" className="s-label">Kunci jawaban</text>
       {mix.map(([, , c, , result], i) => <g key={result}><circle cx={24 + i * 50} cy="262" r="6" fill={c} /><text x={33 + i * 50} y="264.5" className="s-label">{result}</text></g>)}
     </Page>,
+    <Page key="t" title="Roda warna: tulis namanya" lines={['Warnai setiap bagian dengan warna yang kamu suka, lalu tulis nama warnanya di garis.', 'Minta orang dewasa membantu menuliskan nama warna kalau anak belum bisa menulis.']}>
+      {names.map((n, i) => {
+        const a = (-90 + i * 60) * Math.PI / 180
+        const lx = cx + (R + 6) * Math.cos(a), ly = cy + (R + 6) * Math.sin(a)
+        const left = Math.cos(a) < -0.2, right = Math.cos(a) > 0.2
+        return <g key={n}><path d={wedge(i)} fill="#fff" stroke={OLIVE} strokeWidth=".8" strokeLinejoin="round" />
+          <line x1={left ? lx - 30 : right ? lx : lx - 15} y1={ly + (Math.sin(a) > 0.3 ? 4 : -2)} x2={left ? lx : right ? lx + 30 : lx + 15} y2={ly + (Math.sin(a) > 0.3 ? 4 : -2)} stroke={INK} strokeWidth=".4" /></g>
+      })}
+      <circle cx={cx} cy={cy} r="9" fill="#fff" stroke={OLIVE} strokeWidth=".8" />
+    </Page>,
+    <Page key="v" title="Tiga lingkaran ajaib" lines={['Warnai ketiga lingkaran dengan warna primer: merah, kuning, dan biru.', 'Lalu warnai bagian yang saling bertumpuk dengan warna campurannya. Cocokkan dengan kunci di bawah.']}>
+      {[[88, 112, 'merah'], [128, 112, 'kuning'], [108, 148, 'biru']].map(([x, y, n]) => <g key={n}><circle cx={x} cy={y} r="32" fill="#fff" fillOpacity="0" stroke={OLIVE} strokeWidth=".8" strokeDasharray="2.5 1.5" /></g>)}
+      <text x="62" y="82" className="s-label" textAnchor="middle">merah</text><text x="154" y="82" className="s-label" textAnchor="middle">kuning</text><text x="108" y="196" className="s-label" textAnchor="middle">biru</text>
+      <text x="12" y="226" className="s-label">Kunci jawaban</text>
+      {[['#f2a33a', 'merah + kuning = jingga'], ['#6fa86b', 'kuning + biru = hijau'], ['#8e6bb8', 'biru + merah = ungu'], ['#8a6a45', 'ketiganya = cokelat']].map(([c, t], i) => <g key={t}><circle cx={18 + (i % 2) * 90} cy={238 + Math.floor(i / 2) * 16} r="5" fill={c} /><text x={26 + (i % 2) * 90} y={240 + Math.floor(i / 2) * 16} className="s-label">{t}</text></g>)}
+    </Page>,
+    <Page key="h" title="Berburu warna" lines={['Cari satu benda untuk setiap warna di sekitarmu. Gambar atau tuliskan namanya di kotak.']}>
+      {[['#d9544d', 'merah'], ['#f2a33a', 'jingga'], ['#f2c230', 'kuning'], ['#6fa86b', 'hijau'], ['#3b7dd8', 'biru'], ['#8e6bb8', 'ungu']].map(([c, n], i) => {
+        const y = 52 + i * 38
+        return <g key={n}><circle cx="24" cy={y + 12} r="9" fill={c} /><text x="38" y={y + 14} className="s-math">{n}</text><rect x="86" y={y} width="112" height="26" rx="2.5" fill="#fff" stroke={LINE} strokeWidth=".5" strokeDasharray="2 1.6" /></g>
+      })}
+    </Page>,
   ]
 }
 
@@ -203,6 +230,10 @@ function FoodCut({ cx, cy, kind }) {
     {f.pattern === 'semangka' && seeds(7, 4.6, '#2b2b2b')}
     {f.pattern === 'tomat' && <>{segs(3)}{seeds(6, 3.4, '#f2d35b')}</>}
     {f.pattern === 'kiwi' && <><circle cx={cx} cy={cy} r="2.6" fill="#f3f1d0" />{seeds(10, 5.2, '#2b2b2b')}</>}
+    {f.pattern === 'persik' && <ellipse cx={cx} cy={cy} rx="3.4" ry="4.4" fill="#8a5a3a" />}
+    {f.pattern === 'bawang' && [2, 4.2, 6.4, 8.4].map((r) => <circle key={r} cx={cx} cy={cy} r={r} fill="none" stroke="#c9a46a" strokeWidth=".45" />)}
+    {f.pattern === 'delima' && <>{seeds(12, 6.2, '#8f1620')}{seeds(8, 3.4, '#8f1620')}</>}
+    {f.pattern === 'kelapa' && <circle cx={cx} cy={cy} r="3.6" fill="#efe4d0" />}
   </g>
 }
 const FOODS = {
@@ -212,38 +243,65 @@ const FOODS = {
   tomat: { rim: '#d9433a', flesh: '#ef7a6b', pattern: 'tomat' },
   kiwi: { rim: '#8a6a45', flesh: '#9ccb59', pattern: 'kiwi' },
   'jeruk nipis': { rim: '#6fa86b', flesh: '#d8eaa4', pattern: 'jeruk' },
+  lemon: { rim: '#f2c230', flesh: '#fbec9c', pattern: 'jeruk' },
+  persik: { rim: '#f4a58a', flesh: '#fbd6a5', pattern: 'persik', stem: true },
+  'bawang bombay': { rim: '#b98a4a', flesh: '#f7ecd9', pattern: 'bawang' },
+  delima: { rim: '#b3202a', flesh: '#e0525c', pattern: 'delima' },
+  kelapa: { rim: '#6b4a2b', flesh: '#fffaf0', pattern: 'kelapa' },
+  'jeruk bali': { rim: '#e8836a', flesh: '#f7b3a0', pattern: 'jeruk' },
 }
 
 function utuhPotong() {
-  const names = ['apel', 'jeruk', 'semangka', 'tomat', 'kiwi', 'jeruk nipis']
-  const order = [4, 2, 5, 0, 3, 1]
-  return [false, true].map((answer) => <MatchSheet key={answer} answer={answer} rows={names} step={36} top={62} order={order}
-    title={answer ? 'Lembar koreksi: utuh dan potong' : 'Utuh dan potong'} lines={answer ? ['Garis merah menunjukkan pasangan yang benar.'] : ['Di kiri ada buah yang masih utuh, di kanan ada buah yang sudah dipotong. Tarik garis untuk memasangkannya.']}
-    drawLeft={(i, x, y) => <FoodWhole cx={x} cy={y} kind={names[i]} />} drawRight={(j, x, y) => <FoodCut cx={x} cy={y} kind={names[j]} />}
-    labelLeft={(i) => names[i]} />)
+  const sets = [
+    { names: ['apel', 'jeruk', 'semangka', 'tomat', 'kiwi', 'jeruk nipis'], order: [4, 2, 5, 0, 3, 1] },
+    { names: ['lemon', 'persik', 'bawang bombay', 'delima', 'kelapa', 'jeruk bali'], order: [3, 5, 1, 0, 4, 2] },
+    { names: ['apel', 'bawang bombay', 'jeruk nipis', 'kelapa', 'tomat', 'delima'], order: [2, 4, 0, 5, 1, 3] },
+    { names: ['semangka', 'lemon', 'kiwi', 'persik', 'jeruk bali', 'jeruk'], order: [5, 3, 1, 4, 0, 2] },
+  ]
+  return sets.flatMap((set, si) => [false, true].map((answer) => <MatchSheet key={`${si}${answer}`} answer={answer} rows={set.names} step={36} top={62} order={set.order}
+    title={answer ? `Lembar koreksi: utuh dan potong ${si + 1}` : `Utuh dan potong ${si + 1}`} lines={answer ? ['Garis merah menunjukkan pasangan yang benar.'] : ['Di kiri ada buah atau sayur yang masih utuh, di kanan yang sudah dipotong. Tarik garis untuk memasangkannya.']}
+    drawLeft={(i, x, y) => <FoodWhole cx={x} cy={y} kind={set.names[i]} />} drawRight={(j, x, y) => <FoodCut cx={x} cy={y} kind={set.names[j]} />}
+    labelLeft={(i) => set.names[i]} />))
 }
 
 function asalUsul() {
-  const left = [['🥚', 'telur'], ['🥛', 'susu'], ['🍯', 'madu'], ['🧶', 'benang wol'], ['📄', 'kertas'], ['🍞', 'roti']]
-  const right = [['🐔', 'ayam'], ['🐄', 'sapi'], ['🐝', 'lebah'], ['🐑', 'domba'], ['🌳', 'pohon'], ['🌾', 'gandum']]
-  const order = [3, 5, 0, 4, 1, 2]
-  const emoji = ([e]) => <text className="s-emoji" textAnchor="middle" dominantBaseline="central">{e}</text>
-  return [false, true].map((answer) => <MatchSheet key={answer} answer={answer} rows={left} step={36} top={62} order={order}
-    title={answer ? 'Lembar koreksi: dari mana asalnya?' : 'Dari mana asalnya?'} lines={answer ? ['Garis merah menunjukkan pasangan yang benar.'] : ['Tarik garis dari benda di kiri ke asalnya di kanan.']}
+  const sets = [
+    { left: [['🥚', 'telur'], ['🥛', 'susu'], ['🍯', 'madu'], ['🧶', 'benang wol'], ['📄', 'kertas'], ['🍞', 'roti']], right: [['🐔', 'ayam'], ['🐄', 'sapi'], ['🐝', 'lebah'], ['🐑', 'domba'], ['🌳', 'pohon'], ['🌾', 'gandum']], order: [3, 5, 0, 4, 1, 2] },
+    { left: [['🧀', 'keju'], ['🧃', 'jus'], ['🍟', 'kentang goreng'], ['🍿', 'popcorn'], ['🪑', 'kursi'], ['🧣', 'syal']], right: [['🥛', 'susu'], ['🍊', 'jeruk'], ['🥔', 'kentang'], ['🌽', 'jagung'], ['🌲', 'pohon'], ['🐑', 'domba']], order: [4, 2, 5, 0, 3, 1] },
+  ]
+  return sets.flatMap(({ left, right, order }, si) => [false, true].map((answer) => <MatchSheet key={`${si}${answer}`} answer={answer} rows={left} step={36} top={62} order={order}
+    title={answer ? `Lembar koreksi: dari mana asalnya? ${si + 1}` : `Dari mana asalnya? ${si + 1}`} lines={answer ? ['Garis merah menunjukkan pasangan yang benar.'] : ['Tarik garis dari benda di kiri ke asalnya di kanan.']}
     drawLeft={(i, x, y) => <text x={x} y={y} className="s-emoji" textAnchor="middle" dominantBaseline="central">{left[i][0]}</text>}
     drawRight={(j, x, y) => <text x={x} y={y} className="s-emoji" textAnchor="middle" dominantBaseline="central">{right[j][0]}</text>}
-    labelLeft={(i) => left[i][1]} labelRight={(j) => right[j][1]} />)
+    labelLeft={(i) => left[i][1]} labelRight={(j) => right[j][1]} />))
+}
+
+// ---------- empat musim ----------
+function empatMusim() {
+  const names = ['Musim semi', 'Musim panas', 'Musim gugur', 'Musim dingin']
+  const sets = [{ scenes: ['🌸🐝', '☀️🏖️', '🍂🍄', '❄️⛄'], order: [2, 0, 3, 1] }, { scenes: ['🌷🦋', '🍉🌻', '🍁🎃', '⛄🧤'], order: [1, 3, 0, 2] }]
+  return sets.flatMap((set, si) => [false, true].map((answer) => <MatchSheet key={`${si}${answer}`} answer={answer} rows={names} step={52} top={82} order={set.order}
+    title={answer ? `Lembar koreksi: empat musim ${si + 1}` : `Empat musim ${si + 1}`} lines={answer ? ['Garis merah menunjukkan pasangan yang benar.'] : ['Tarik garis dari gambar di kiri ke nama musimnya. Di Indonesia kita punya musim hujan dan kemarau, tetapi di negara lain ada empat musim.']}
+    drawLeft={(i, x, y) => <text x={x} y={y} className="s-emoji-l" textAnchor="middle" dominantBaseline="central">{set.scenes[i]}</text>}
+    drawRight={(j, x, y) => <text x={x} y={y + 2} className="s-word-l" textAnchor="middle">{names[j]}</text>} />))
 }
 
 function menjahit() {
   const edge = (verts, per) => verts.flatMap((v, i) => { const w = verts[(i + 1) % verts.length]; return Array.from({ length: per }, (_, k) => [v[0] + ((w[0] - v[0]) * k) / per, v[1] + ((w[1] - v[1]) * k) / per]) })
+  const poly = (name, verts, per) => ({ name, outline: (cx, cy) => <polygon points={pts(verts(cx, cy))} />, holes: (cx, cy) => edge(verts(cx, cy), per) })
   const shapes = [
     { name: 'Lingkaran', outline: (cx, cy) => <circle cx={cx} cy={cy} r="34" />, holes: (cx, cy) => polygon(cx, cy, 34, 20) },
-    { name: 'Persegi', outline: (cx, cy) => <rect x={cx - 30} y={cy - 30} width="60" height="60" />, holes: (cx, cy) => edge([[cx - 30, cy - 30], [cx + 30, cy - 30], [cx + 30, cy + 30], [cx - 30, cy + 30]], 5) },
-    { name: 'Segitiga', outline: (cx, cy) => <polygon points={pts(polygon(cx, cy + 6, 38, 3))} />, holes: (cx, cy) => edge(polygon(cx, cy + 6, 38, 3), 6) },
-    { name: 'Bintang', outline: (cx, cy) => <polygon points={pts(starPoints(cx, cy + 3, 38, 16))} />, holes: (cx, cy) => edge(starPoints(cx, cy + 3, 38, 16), 2) },
+    poly('Persegi', (cx, cy) => [[cx - 30, cy - 30], [cx + 30, cy - 30], [cx + 30, cy + 30], [cx - 30, cy + 30]], 5),
+    poly('Segitiga', (cx, cy) => polygon(cx, cy + 6, 38, 3), 6),
+    poly('Bintang', (cx, cy) => starPoints(cx, cy + 3, 38, 16), 2),
     { name: 'Hati', outline: (cx, cy) => <polygon points={pts(heartPoints(cx, cy - 4, 2.1))} />, holes: (cx, cy) => heartPoints(cx, cy - 4, 2.1, 24) },
-    { name: 'Segi enam', outline: (cx, cy) => <polygon points={pts(polygon(cx, cy, 34, 6, 0))} />, holes: (cx, cy) => edge(polygon(cx, cy, 34, 6, 0), 3) },
+    poly('Segi enam', (cx, cy) => polygon(cx, cy, 34, 6, 0), 3),
+    poly('Persegi panjang', (cx, cy) => [[cx - 36, cy - 22], [cx + 36, cy - 22], [cx + 36, cy + 22], [cx - 36, cy + 22]], 6),
+    poly('Belah ketupat', (cx, cy) => [[cx, cy - 38], [cx + 27, cy], [cx, cy + 38], [cx - 27, cy]], 5),
+    poly('Segi lima', (cx, cy) => polygon(cx, cy + 2, 37, 5), 4),
+    { name: 'Oval', outline: (cx, cy) => <ellipse cx={cx} cy={cy} rx="37" ry="25" />, holes: (cx, cy) => Array.from({ length: 24 }, (_, i) => { const a = (i / 24) * Math.PI * 2 - Math.PI / 2; return [cx + 37 * Math.cos(a), cy + 25 * Math.sin(a)] }) },
+    poly('Rumah', (cx, cy) => [[cx - 30, cy + 28], [cx - 30, cy - 4], [cx, cy - 32], [cx + 30, cy - 4], [cx + 30, cy + 28]], 4),
+    poly('Jajar genjang', (cx, cy) => [[cx - 36, cy + 22], [cx - 16, cy - 22], [cx + 36, cy - 22], [cx + 16, cy + 22]], 5),
   ]
   return chunk(shapes, 4).map((group, p) => <Page key={p} name={false} title="Menjahit bentuk" lines={['Cetak di kertas tebal, gunting mengikuti garis putus-putus, lalu lubangi titik-titiknya dengan pelubang kertas atau jarum tumpul.', 'Anak menjahit mengikuti bentuk memakai benang wol atau tali sepatu yang ujungnya dilem.']}>
     {group.map((s, i) => {
@@ -298,18 +356,19 @@ function kartuHuruf() {
 
 function PictureSet({ items, name }) {
   const grid = (i) => ({ x: 12 + (i % 3) * 64, y: 48 + Math.floor(i / 3) * 56 })
-  const pages = [
+  const groups = chunk(items, 12)
+  const kinds = [
     { key: 'k', title: `Kartu kontrol: ${name}`, line: 'Kartu gambar + kata. Simpan satu set ini sebagai kunci; anak mencocokkan kartu gambar dan kartu kata dengannya.', draw: ([e, w], x, y) => <><text x={x + 29} y={y + 21} className="s-emoji-l" textAnchor="middle" dominantBaseline="central">{e}</text><text x={x + 29} y={y + 45} className="s-word" textAnchor="middle">{w}</text></> },
     { key: 'g', title: `Kartu gambar: ${name}`, line: 'Gunting kartunya. Anak menyebutkan nama gambar, lalu mencari kartu kata yang cocok.', draw: ([e], x, y) => <text x={x + 29} y={y + 27} className="s-emoji-l" textAnchor="middle" dominantBaseline="central">{e}</text> },
     { key: 'w', title: `Kartu kata: ${name}`, line: 'Gunting kartunya. Letakkan kartu kata di bawah kartu gambar yang cocok.', draw: ([, w], x, y) => <text x={x + 29} y={y + 31} className="s-word-l" textAnchor="middle">{w}</text> },
   ]
-  return pages.map((pg) => <Page key={pg.key} name={false} title={pg.title} lines={[pg.line]}>
-    {items.map((it, i) => { const { x, y } = grid(i); return <CutCard key={it[1]} x={x} y={y} w={58} h={51}>{pg.draw(it, x, y)}</CutCard> })}
-  </Page>)
+  return kinds.flatMap((kind) => groups.map((group, gi) => <Page key={`${kind.key}${gi}`} name={false} title={groups.length > 1 ? `${kind.title} (${gi + 1}/${groups.length})` : kind.title} lines={[kind.line]}>
+    {group.map((it, i) => { const { x, y } = grid(i); return <CutCard key={it[1]} x={x} y={y} w={58} h={51}>{kind.draw(it, x, y)}</CutCard> })}
+  </Page>))
 }
-const FOOD_SET = [['🍓', 'stroberi'], ['🍌', 'pisang'], ['🥑', 'alpukat'], ['🍎', 'apel'], ['🍇', 'anggur'], ['🥦', 'brokoli'], ['🍊', 'jeruk'], ['🍍', 'nanas'], ['🍉', 'semangka'], ['🍅', 'tomat'], ['🥕', 'wortel'], ['🥚', 'telur']]
-const ANIMAL_SET = [['🐱', 'kucing'], ['🐶', 'anjing'], ['🐄', 'sapi'], ['🐔', 'ayam'], ['🐴', 'kuda'], ['🐘', 'gajah'], ['🦁', 'singa'], ['🐢', 'kura-kura'], ['🐟', 'ikan'], ['🦆', 'bebek'], ['🐰', 'kelinci'], ['🦋', 'kupu-kupu']]
-const HOME_SET = [['🛏️', 'tempat tidur'], ['🪑', 'kursi'], ['🚪', 'pintu'], ['🪟', 'jendela'], ['🛁', 'bak mandi'], ['🧺', 'keranjang'], ['🔑', 'kunci'], ['💡', 'lampu'], ['⏰', 'jam'], ['📺', 'televisi'], ['🧹', 'sapu'], ['🪥', 'sikat gigi']]
+const FOOD_SET = [['🍓', 'stroberi'], ['🍌', 'pisang'], ['🥑', 'alpukat'], ['🍎', 'apel'], ['🍇', 'anggur'], ['🥦', 'brokoli'], ['🍊', 'jeruk'], ['🍍', 'nanas'], ['🍉', 'semangka'], ['🍅', 'tomat'], ['🥕', 'wortel'], ['🥚', 'telur'], ['🍒', 'ceri'], ['🥝', 'kiwi'], ['🥭', 'mangga'], ['🍐', 'pir'], ['🍑', 'persik'], ['🍋', 'lemon'], ['🍈', 'melon'], ['🥥', 'kelapa'], ['🌽', 'jagung'], ['🥔', 'kentang'], ['🧄', 'bawang putih'], ['🧅', 'bawang bombay'], ['🥒', 'mentimun'], ['🌶️', 'cabai'], ['🍆', 'terong'], ['🍞', 'roti'], ['🧀', 'keju'], ['🍔', 'burger'], ['🍿', 'popcorn'], ['🍫', 'cokelat'], ['🥜', 'kacang'], ['🍯', 'madu'], ['🍚', 'nasi'], ['🥛', 'susu']]
+const ANIMAL_SET = [['🐱', 'kucing'], ['🐶', 'anjing'], ['🐄', 'sapi'], ['🐔', 'ayam'], ['🐴', 'kuda'], ['🐘', 'gajah'], ['🦁', 'singa'], ['🐢', 'kura-kura'], ['🐟', 'ikan'], ['🦆', 'bebek'], ['🐰', 'kelinci'], ['🦋', 'kupu-kupu'], ['🐯', 'harimau'], ['🐻', 'beruang'], ['🦉', 'burung hantu'], ['🦅', 'elang'], ['🐬', 'lumba-lumba'], ['🦊', 'rubah'], ['🐺', 'serigala'], ['🐀', 'tikus'], ['🐿️', 'tupai'], ['🐍', 'ular'], ['🐌', 'siput'], ['🐑', 'domba'], ['🐐', 'kambing'], ['🦢', 'angsa'], ['🦜', 'burung beo'], ['🦏', 'badak'], ['🦒', 'jerapah'], ['🦓', 'zebra'], ['🐒', 'monyet'], ['🐼', 'panda'], ['🐝', 'lebah'], ['🐜', 'semut'], ['🦀', 'kepiting'], ['🐳', 'paus']]
+const HOME_SET = [['🛏️', 'tempat tidur'], ['🪑', 'kursi'], ['🚪', 'pintu'], ['🪟', 'jendela'], ['🛁', 'bak mandi'], ['🧺', 'keranjang'], ['🔑', 'kunci'], ['💡', 'lampu'], ['⏰', 'jam'], ['📺', 'televisi'], ['🧹', 'sapu'], ['🪥', 'sikat gigi'], ['💻', 'laptop'], ['🖨️', 'printer'], ['☎️', 'telepon'], ['📱', 'ponsel'], ['📷', 'kamera'], ['📻', 'radio'], ['☂️', 'payung'], ['✂️', 'gunting'], ['🥄', 'sendok'], ['🍴', 'garpu'], ['🍽️', 'piring'], ['☕', 'cangkir'], ['🧼', 'sabun'], ['🪣', 'ember'], ['🪞', 'cermin'], ['🛋️', 'sofa'], ['🚽', 'toilet'], ['🚿', 'pancuran'], ['🕯️', 'lilin'], ['📖', 'buku'], ['📦', 'kotak']]
 
 function kartuPerasaan() {
   const items = [['😄', 'senang'], ['😢', 'sedih'], ['😠', 'marah'], ['🥱', 'bosan'], ['😴', 'lelah'], ['😲', 'kaget'], ['😕', 'bingung'], ['😟', 'khawatir'], ['😞', 'kecewa'], ['🤩', 'bersemangat'], ['😌', 'lega'], ['🤪', 'jahil']]
@@ -321,19 +380,20 @@ function kartuPerasaan() {
 export const printables = [
   { id: 'penjumlahan-tambah-satu', category: 'Matematika', icon: '➕', title: 'Menambah satu', summary: 'Hitung bulatan, tambah satu, tulis jawabannya. Ada lembar koreksi untuk mengecek sendiri.', how: 'Cetak lembar pertama untuk anak dan simpan lembar koreksi untuk orang dewasa. Mulai dari baris pertama dan berhenti kapan pun anak lelah.', pages: penjumlahan },
   { id: 'kartu-angka', category: 'Matematika', icon: '🔢', title: 'Kartu angka 1–20', summary: 'Kartu angka dengan tulisan namanya, ditambah simbol + − =.', how: 'Gunting kartunya. Tunjukkan satu per satu, atau susun berurutan bersama anak.', pages: kartuAngka },
-  { id: 'jepit-jemuran-angka', category: 'Matematika', icon: '📌', title: 'Jepit jemuran: cocokkan angka', summary: 'Hitung bulatan lalu jepit jepit jemuran di angka yang tepat. Melatih jari sekaligus berhitung.', how: 'Cetak di kertas agak tebal. Siapkan 10 jepit jemuran kecil.', pages: jepitAngka },
+  { id: 'jepit-jemuran-angka', category: 'Matematika', icon: '📌', title: 'Jepit jemuran: cocokkan angka', summary: 'Hitung bulatan 1–20 lalu jepit jepit jemuran di angka yang tepat. Melatih jari sekaligus berhitung.', how: 'Cetak di kertas agak tebal. Siapkan 10 jepit jemuran kecil. Mulai dari angka 1–10, lanjut ke 11–20.', pages: jepitAngka },
   { id: 'hari-dan-bulan', category: 'Matematika', icon: '📅', title: 'Hari dan bulan', summary: 'Pita warna-warni untuk menyusun urutan hari dalam seminggu dan bulan dalam setahun.', how: 'Gunting pitanya dan acak. Anak menyusun berurutan seperti pelangi.', pages: hariBulan },
-  { id: 'cocokkan-bentuk', category: 'Sensorial', icon: '🔷', title: 'Cocokkan bentuk', summary: 'Tarik garis antara bentuk yang sama. Dua tingkat kesulitan dengan lembar koreksi.', how: 'Mulai dari lembar 1 (6 bentuk). Lembar 2 lebih menantang (8 bentuk).', pages: cocokkanBentuk },
-  { id: 'roda-warna', category: 'Sensorial', icon: '🎨', title: 'Roda warna dan campur warna', summary: 'Warnai roda warna primer dan sekunder, lalu tebak hasil campuran warna.', how: 'Siapkan krayon merah, kuning, biru, jingga, hijau, dan ungu.', pages: rodaWarna },
+  { id: 'cocokkan-bentuk', category: 'Sensorial', icon: '🔷', title: 'Cocokkan bentuk', summary: 'Tarik garis antara bentuk yang sama. Empat lembar (6 dan 8 bentuk) dengan lembar koreksi.', how: 'Mulai dari lembar 1 dan 3 (6 bentuk). Lembar 2 dan 4 lebih menantang (8 bentuk).', pages: cocokkanBentuk },
+  { id: 'roda-warna', category: 'Sensorial', icon: '🎨', title: 'Roda warna dan campur warna', summary: 'Roda warna primer dan sekunder, campur warna, tiga lingkaran ajaib, dan berburu warna (5 halaman).', how: 'Siapkan krayon merah, kuning, biru, jingga, hijau, dan ungu.', pages: rodaWarna },
   { id: 'berburu-benda', category: 'Sensorial', icon: '🔎', title: 'Berburu benda di sekitar', summary: 'Daftar petunjuk indra: kasar, halus, harum, dingin, berbunyi, dan lainnya.', how: 'Bawa lembar ini berjalan keliling rumah atau halaman. Centang setiap temuan.', pages: berburu },
-  { id: 'utuh-dan-potong', category: 'Kehidupan praktis', icon: '🍎', title: 'Utuh dan potong', summary: 'Pasangkan buah yang masih utuh dengan buah yang sudah dipotong. Cocok dilanjutkan dengan memotong buah sungguhan.', how: 'Setelah mengerjakan lembar ini, ajak anak menyiapkan buah sungguhan dengan pisau anak.', pages: utuhPotong },
-  { id: 'dari-mana-asalnya', category: 'Kehidupan praktis', icon: '🐑', title: 'Dari mana asalnya?', summary: 'Telur dari ayam, susu dari sapi, kertas dari pohon. Pasangkan benda dengan asalnya.', how: 'Obrolkan juga benda lain di rumah: dari mana asalnya?', pages: asalUsul },
-  { id: 'menjahit-bentuk', category: 'Kehidupan praktis', icon: '🧵', title: 'Menjahit bentuk', summary: 'Kartu jahit berbentuk lingkaran, persegi, segitiga, bintang, hati, dan segi enam.', how: 'Cetak di kertas tebal, lubangi titiknya, lalu jahit memakai benang wol atau tali sepatu.', pages: menjahit },
+  { id: 'empat-musim', category: 'Sensorial', icon: '🍂', title: 'Empat musim', summary: 'Pasangkan gambar dengan musim semi, panas, gugur, dan dingin. Dua lembar dengan lembar koreksi.', how: 'Ceritakan bahwa Indonesia punya musim hujan dan kemarau, sedangkan di negara lain ada empat musim.', pages: empatMusim },
+  { id: 'utuh-dan-potong', category: 'Kehidupan praktis', icon: '🍎', title: 'Utuh dan potong', summary: 'Pasangkan buah dan sayur yang masih utuh dengan yang sudah dipotong. Empat lembar dengan lembar koreksi.', how: 'Setelah mengerjakan lembar ini, ajak anak menyiapkan buah sungguhan dengan pisau anak.', pages: utuhPotong },
+  { id: 'dari-mana-asalnya', category: 'Kehidupan praktis', icon: '🐑', title: 'Dari mana asalnya?', summary: 'Telur dari ayam, susu dari sapi, kertas dari pohon. Dua lembar dengan lembar koreksi.', how: 'Obrolkan juga benda lain di rumah: dari mana asalnya?', pages: asalUsul },
+  { id: 'menjahit-bentuk', category: 'Kehidupan praktis', icon: '🧵', title: 'Menjahit bentuk', summary: 'Dua belas kartu jahit: lingkaran, persegi, segitiga, bintang, hati, segi enam, oval, rumah, dan lainnya.', how: 'Cetak di kertas tebal, lubangi titiknya, lalu jahit memakai benang wol atau tali sepatu.', pages: menjahit },
   { id: 'menjiplak-huruf', category: 'Bahasa', icon: '✏️', title: 'Menjiplak huruf A–Z', summary: 'Jiplak huruf besar dan kecil putus-putus untuk melatih pegangan pensil.', how: 'Mulai dari huruf di nama anak. Satu baris sudah cukup untuk satu hari.', pages: jiplakHuruf },
   { id: 'kartu-huruf', category: 'Bahasa', icon: '🔤', title: 'Kartu huruf: A untuk apel', summary: 'Kartu huruf bergambar dengan kata bahasa Indonesia untuk setiap huruf (huruf Q punya dua kartu: Al-Qur\'an dan queen).', how: 'Gunting dan cetak berkali-kali sesuai kebutuhan. Mainkan sebagai tebak bunyi awal.', pages: kartuHuruf },
-  { id: 'kartu-makanan', category: 'Bahasa', icon: '🍓', title: 'Kartu gambar: buah dan makanan', summary: 'Set tiga bagian (kartu kontrol, kartu gambar, kartu kata) untuk memperkaya kosakata.', how: 'Mulai dengan kartu gambar saja, lalu tambahkan kartu kata setelah anak hafal.', pages: () => PictureSet({ items: FOOD_SET, name: 'buah dan makanan' }) },
-  { id: 'kartu-hewan', category: 'Bahasa', icon: '🐘', title: 'Kartu gambar: hewan', summary: 'Set tiga bagian dengan 12 hewan yang akrab bagi anak.', how: 'Tiru suara hewannya sambil menyebut nama pada kartu.', pages: () => PictureSet({ items: ANIMAL_SET, name: 'hewan' }) },
-  { id: 'kartu-benda-rumah', category: 'Bahasa', icon: '🏠', title: 'Kartu gambar: benda di rumah', summary: 'Set tiga bagian dengan benda sehari-hari di rumah.', how: 'Setelah mencocokkan kartu, ajak anak mencari benda aslinya di rumah.', pages: () => PictureSet({ items: HOME_SET, name: 'benda di rumah' }) },
+  { id: 'kartu-makanan', category: 'Bahasa', icon: '🍓', title: 'Kartu gambar: buah dan makanan', summary: 'Set tiga bagian (kartu kontrol, kartu gambar, kartu kata) dengan 36 buah dan makanan.', how: 'Mulai dengan kartu gambar saja, lalu tambahkan kartu kata setelah anak hafal.', pages: () => PictureSet({ items: FOOD_SET, name: 'buah dan makanan' }) },
+  { id: 'kartu-hewan', category: 'Bahasa', icon: '🐘', title: 'Kartu gambar: hewan', summary: 'Set tiga bagian dengan 36 hewan, dari hewan peliharaan sampai hewan liar.', how: 'Tiru suara hewannya sambil menyebut nama pada kartu.', pages: () => PictureSet({ items: ANIMAL_SET, name: 'hewan' }) },
+  { id: 'kartu-benda-rumah', category: 'Bahasa', icon: '🏠', title: 'Kartu gambar: benda di rumah', summary: 'Set tiga bagian dengan 33 benda dan peralatan sehari-hari di rumah.', how: 'Setelah mencocokkan kartu, ajak anak mencari benda aslinya di rumah.', pages: () => PictureSet({ items: HOME_SET, name: 'benda di rumah' }) },
   { id: 'kartu-perasaan', category: 'Bahasa', icon: '😊', title: 'Kartu perasaan', summary: 'Dua belas kartu perasaan untuk membantu anak menamai apa yang ia rasakan.', how: 'Pakai saat ngobrol sebelum tidur: "Hari ini kamu merasa yang mana?"', pages: kartuPerasaan },
 ]
 

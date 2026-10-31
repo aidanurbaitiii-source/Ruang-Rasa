@@ -153,6 +153,37 @@ function PrintButton({ label }) {
   </>
 }
 
+const baseName = (text) => text.replace(/\s*\(.*?\)/g, '').replace(/^\d+\s+/, '').trim().toLowerCase()
+
+function sharedMaterials(chosen) {
+  const map = new Map()
+  chosen.forEach((item) => {
+    new Set(item.materials.map(baseName)).forEach((key) => { const row = map.get(key) || []; row.push(item.title); map.set(key, row) })
+  })
+  return [...map].filter(([, titles]) => titles.length > 1).map(([key, titles]) => ({ name: key.charAt(0).toUpperCase() + key.slice(1), count: titles.length }))
+}
+
+function PlanSheet({ plan, chosen, dateLabel }) {
+  const shared = sharedMaterials(chosen)
+  return <div className="plan-sheet">
+    <div className="paper-top"><div className="paper-logo"><img className="deer-logo" src={logoScene} alt="" /></div><span>RUANG RASA <i>·</i> CHECKLIST KEGIATAN</span></div>
+    <div className="paper-meta"><span>Nama: <b>{plan.name || '____________'}</b></span><span>Tanggal: <b>{dateLabel || '____________'}</b></span></div>
+    <div className="paper-title">Hari ini, kita mencoba…</div>
+    <h3 className="sheet-h">Checklist kegiatan</h3>
+    {chosen.map((item, index) => <div className="paper-activity" key={item.slug}><div className="paper-num">{String(index + 1).padStart(2, '0')}</div><div><strong>{item.title}</strong><small>{item.age} · {item.time} · Berantakan: {item.mess.toLowerCase()}</small></div><span className="check-box" /></div>)}
+    <h3 className="sheet-h">Alat dan bahan yang disiapkan</h3>
+    <p className="sheet-note">Centang setelah barangnya terkumpul di nampan.</p>
+    {shared.length > 0 && <div className="sheet-block"><h4>Dipakai di lebih dari satu kegiatan</h4><ul className="sheet-list">{shared.map((row) => <li key={row.name}><span className="check-box"/>{row.name} <em>({row.count} kegiatan)</em></li>)}</ul></div>}
+    {chosen.map((item, index) => <div className="sheet-block" key={item.slug}>
+      <h4>{String(index + 1).padStart(2, '0')} · {item.title}</h4>
+      <ul className="sheet-list">{item.materials.map((material) => <li key={material}><span className="check-box"/>{material}</li>)}</ul>
+      {item.prep?.length > 0 && <p className="sheet-prep"><b>Persiapan:</b> {item.prep.join(' ')}</p>}
+    </div>)}
+    <div className="paper-reflect"><span>Setelah mencoba, aku merasa…</span><div className="writing-line"/><div className="writing-line"/></div>
+    <div className="paper-footer"><span>Tak harus sempurna. Cukup hadir bersama.</span><span>ruang rasa <i>✿</i></span></div>
+  </div>
+}
+
 function PlanPrintPage({ plan }) {
   const chosen = plan.slugs.map((slug) => activityBySlug[slug]).filter(Boolean)
   const dateLabel = plan.date ? new Date(`${plan.date}T00:00:00`).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : ''
@@ -160,11 +191,11 @@ function PlanPrintPage({ plan }) {
     <style>{'@page{size:A4;margin:12mm}'}</style>
     <div className="print-toolbar">
       <a className="back-link" href="#printable"><ArrowLeft size={15}/> Ubah kegiatan</a>
-      <div className="eyebrow">PRATINJAU CETAK</div><h1>Lembar kegiatan hari ini</h1>
-      <p className="subpage-intro">Beginilah tampilan lembar di kertas A4. Periksa dulu, lalu cetak.</p>
-      <div className="print-actions"><PrintButton label="Cetak lembar ini" /></div>
+      <div className="eyebrow">PRATINJAU CETAK</div><h1>Checklist kegiatan hari ini</h1>
+      <p className="subpage-intro">Berisi daftar kegiatan dan semua alat serta bahan yang perlu disiapkan. Periksa dulu, lalu cetak.</p>
+      <div className="print-actions"><PrintButton label="Cetak checklist" /></div>
     </div>
-    {chosen.length === 0 ? <div className="empty-state"><strong>Belum ada kegiatan terpilih.</strong><a className="button-primary" href="#printable">Pilih kegiatan <ArrowRight size={16}/></a></div> : <PlanPaper plan={plan} chosen={chosen} dateLabel={dateLabel} />}
+    {chosen.length === 0 ? <div className="empty-state"><strong>Belum ada kegiatan terpilih.</strong><a className="button-primary" href="#printable">Pilih kegiatan <ArrowRight size={16}/></a></div> : <div className="paper plan-paper-full"><PlanSheet plan={plan} chosen={chosen} dateLabel={dateLabel} /></div>}
   </main>
 }
 
@@ -210,7 +241,7 @@ const shortMaterials = (activity) => activity.materials.slice(0, 2).map((item) =
 
 function PlanPaper({ plan, chosen, dateLabel }) {
   return (
-    <div className="paper-wrap"><div className="paper"><div className="paper-top"><div className="paper-logo"><img className="deer-logo" src={logoScene} alt="" /></div><span>RUANG RASA <i>·</i> LEMBAR KEGIATAN</span></div>
+    <div className="paper-wrap"><div className="paper"><div className="paper-top"><div className="paper-logo"><img className="deer-logo" src={logoScene} alt="" /></div><span>RUANG RASA <i>·</i> CHECKLIST KEGIATAN</span></div>
       <div className="paper-meta"><span>Nama: <b>{plan.name || '____________'}</b></span><span>Tanggal: <b>{dateLabel || '____________'}</b></span></div>
       <div className="paper-title">Hari ini, kita mencoba…</div>
       {chosen.length === 0 ? <div className="paper-empty">Pilih kegiatan di samping, dan lembar ini akan terisi.</div> : chosen.map((item, index) => <div className="paper-activity" key={item.slug}><div className="paper-num">{String(index + 1).padStart(2, '0')}</div><div><strong>{item.title}</strong><small>{item.age} · {item.time}<br/>Siapkan: {shortMaterials(item)}</small></div><span className="check-box"/></div>)}
@@ -232,9 +263,9 @@ function Planner({ plan, setPlan, saved }) {
   const move = (index, step) => setPlan((current) => { const slugs = [...current.slugs]; const target = index + step; if (target < 0 || target >= slugs.length) return current; [slugs[index], slugs[target]] = [slugs[target], slugs[index]]; return { ...current, slugs } })
   return <section className="printable section-wrap" id="printable">
     <div className="printable-copy">
-      <div className="eyebrow">UNTUK DICETAK, UNTUK DICOBA</div>
-      <h2>Rencana kecil untuk<br/><em>hari yang penuh rasa.</em></h2>
-      <p>Pilih kegiatan yang ingin dicoba hari ini, isi nama si kecil, lalu cetak lembarnya. Pilihanmu tersimpan di peramban ini.</p>
+      <div className="eyebrow">CHECKLIST KEGIATAN</div>
+      <h2>Pilih kegiatan,<br/><em>bawa pulang daftarnya.</em></h2>
+      <p>Pilih kegiatan yang ingin dicoba hari ini. Checklist yang dicetak memuat daftar kegiatan beserta alat dan bahan lengkap untuk disiapkan. Pilihanmu tersimpan di peramban ini.</p>
       <div className="plan-fields">
         <label>Nama si kecil<input type="text" value={plan.name} maxLength={30} placeholder="Contoh: Aira" onChange={(event) => setPlan((current) => ({ ...current, name: event.target.value }))} /></label>
         <label>Tanggal<input type="date" value={plan.date} onChange={(event) => setPlan((current) => ({ ...current, date: event.target.value }))} /></label>
@@ -245,7 +276,7 @@ function Planner({ plan, setPlan, saved }) {
       </div>
       <div className="plan-actions">
         <button type="button" className="button-primary" aria-expanded={open} onClick={() => setOpen((value) => !value)}>{open ? 'Tutup pilihan' : 'Pilih kegiatan'}</button>
-        <a className={chosen.length === 0 ? 'button-primary print-button is-disabled' : 'button-primary print-button'} href="#/rencana" aria-disabled={chosen.length === 0} onClick={(event) => { if (chosen.length === 0) event.preventDefault() }}><Printer size={16}/> Lihat &amp; cetak</a>
+        <a className={chosen.length === 0 ? 'button-primary print-button is-disabled' : 'button-primary print-button'} href="#/rencana" aria-disabled={chosen.length === 0} onClick={(event) => { if (chosen.length === 0) event.preventDefault() }}><Printer size={16}/> Lihat checklist</a>
         {favourites.length > 0 && <button type="button" className="text-link as-button" onClick={() => setPlan((current) => ({ ...current, slugs: favourites.map((item) => item.slug).slice(0, MAX_PLAN) }))}>Pakai favorit ({favourites.length})</button>}
         {chosen.length > 0 && <button type="button" className="text-link as-button" onClick={() => setPlan((current) => ({ ...current, slugs: [] }))}>Kosongkan</button>}
       </div>
@@ -325,7 +356,7 @@ function App() {
 
   return <>
     <header className="site-header"><a className="brand" href="#beranda"><img className="brand-logo" src={logoHorizontal} alt="Ruang Rasa" width="150" height="47" /></a>
-      <nav id="menu-utama" className={menuOpen ? 'open' : ''} aria-label="Menu utama"><a href="#aktivitas">Aktivitas</a><a href="#/semua" className="nav-extra">Semua ide</a><a href="#/montessori">Tentang Montessori</a><a href="#/playdate" className="nav-extra">Panduan playdate</a><a href="#printable">Printable</a></nav>
+      <nav id="menu-utama" className={menuOpen ? 'open' : ''} aria-label="Menu utama"><a href="#aktivitas">Aktivitas</a><a href="#/semua" className="nav-extra">Semua ide</a><a href="#/montessori">Tentang Montessori</a><a href="#/playdate" className="nav-extra">Panduan playdate</a><a href="#printable">Checklist</a></nav>
       <div className="header-right"><a className="header-cta" href="#aktivitas">Temukan ide <ArrowRight size={15}/></a><button type="button" className="menu-toggle" aria-label={menuOpen ? 'Tutup menu' : 'Buka menu'} aria-expanded={menuOpen} aria-controls="menu-utama" onClick={() => setMenuOpen((value) => !value)}>{menuOpen ? <X size={20}/> : <Menu size={20}/>}</button></div>
     </header>
 

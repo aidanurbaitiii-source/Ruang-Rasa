@@ -438,6 +438,46 @@ function tumbuhDariBiji() {
   ]
 }
 
+// ---------- Paket angka (dijual): satu lembar untuk tiap angka ----------
+const COUNT_SHAPES = ['bintang', 'hati', 'lingkaran', 'segitiga', 'persegi', 'segi enam']
+
+function angkaPages(from, to) {
+  return Array.from({ length: to - from + 1 }, (_, k) => {
+    const n = from + k, color = PALETTE[(n - 1) % 6], shape = COUNT_SHAPES[(n - 1) % 6], ten = n > 10
+    // satu kelompok bulatan: dipakai pada pilihan "lingkari"
+    const options = [n > 1 ? n - 1 : n + 2, n, n + 1]
+    const shift = n % 3
+    const ordered = options.map((_, i) => options[(i + shift) % 3])
+    const frame = (x, y, count) => <g>
+      <rect x={x} y={y} width="65" height="26" rx="2" fill="#fff" stroke={OLIVE} strokeWidth=".4" />
+      {Array.from({ length: 10 }, (_, i) => <rect key={i} x={x + (i % 5) * 13} y={y + Math.floor(i / 5) * 13} width="13" height="13" fill="none" stroke={LINE} strokeWidth=".3" />)}
+      {Array.from({ length: count }, (_, i) => <circle key={i} cx={x + (i % 5) * 13 + 6.5} cy={y + Math.floor(i / 5) * 13 + 6.5} r="4.4" fill={color} stroke={OLIVE} strokeWidth=".4" />)}
+    </g>
+    return <Page key={n} title={`Angka ${n}`} lines={[`Ini angka ${n}, dibaca "${KATA[n]}". Jiplak, hitung, warnai, lalu tulis sendiri.`]}>
+      <rect x="12" y="44" width="186" height="68" rx="4" fill="#faf6ec" stroke="#e1dacd" strokeWidth=".4" />
+      <text x={ten ? 40 : 40} y="86" textAnchor="middle" fontSize={ten ? 40 : 54} fontWeight="700" style={{ fontFamily: "'Nunito','Trebuchet MS',sans-serif", fill: color }}>{n}</text>
+      <text x="40" y="104" className="s-label" textAnchor="middle">{KATA[n]}</text>
+      {ten ? <>{frame(82, 50, 10)}{frame(82, 82, n - 10)}<text x="152" y="66" className="s-label">10</text><text x="152" y="98" className="s-label">+ {n - 10} = {n}</text></>
+        : Array.from({ length: n }, (_, i) => <Shape key={i} name={shape} cx={90 + (i % 5) * 21} cy={62 + Math.floor(i / 5) * 24} r={7} fill={color} stroke={OLIVE} />)}
+      <text x="12" y="123" className="s-label">1. Jiplak angkanya</text>
+      {[0, 1].map((row) => { const y = 145 + row * 26; return <g key={row}>
+        <line x1="12" y1={y} x2="198" y2={y} stroke="#cfc9b5" strokeWidth=".4" />
+        <line x1="12" y1={y - 15} x2="198" y2={y - 15} stroke="#e8e3d3" strokeWidth=".4" strokeDasharray="1.5 1.5" />
+        {[0, 1, 2, 3, 4].map((i) => <text key={i} x={14 + i * 37} y={y - 1.5} className={row === 0 && i === 0 ? 's-trace-solid' : 's-trace'}>{n}</text>)}
+      </g> })}
+      <text x="12" y="186" className="s-label">2. Hitung dan warnai bentuknya</text>
+      {Array.from({ length: n }, (_, i) => <Shape key={i} name={shape} cx={20 + (i % 10) * 17.5} cy={199 + Math.floor(i / 10) * 17} r={6} fill="#fff" stroke={OLIVE} />)}
+      <text x="12" y="238" className="s-label">3. Lingkari kelompok yang berisi {n}</text>
+      {ordered.map((count, g) => <g key={g}>
+        <rect x={12 + g * 63} y="242" width="60" height="24" rx="3" fill="#fff" stroke={LINE} strokeWidth=".4" strokeDasharray="2 1.6" />
+        {Array.from({ length: count }, (_, i) => <circle key={i} cx={18 + g * 63 + (i % 9) * 6.2} cy={248 + Math.floor(i / 9) * 6.2} r="2.2" fill={color} stroke={OLIVE} strokeWidth=".3" />)}
+      </g>)}
+      <text x="12" y="278" className="s-label">4. Tulis angkanya</text>
+      {Array.from({ length: 6 }, (_, i) => <rect key={i} x={50 + i * 17} y="271" width="13" height="10" fill="#fff" stroke={OLIVE} strokeWidth=".4" />)}
+    </Page>
+  })
+}
+
 export const printables = [
   { id: 'penjumlahan-tambah-satu', category: 'Matematika', icon: '➕', title: 'Menambah satu', summary: 'Hitung bulatan, tambah satu, tulis jawabannya. Ada lembar koreksi untuk mengecek sendiri.', how: 'Cetak lembar pertama untuk anak dan simpan lembar koreksi untuk orang dewasa. Mulai dari baris pertama dan berhenti kapan pun anak lelah.', pages: penjumlahan },
   { id: 'kartu-angka', category: 'Matematika', icon: '🔢', title: 'Kartu angka 1–20', summary: 'Kartu angka dengan tulisan namanya, ditambah simbol + − =.', how: 'Gunting kartunya. Tunjukkan satu per satu, atau susun berurutan bersama anak.', pages: kartuAngka },
@@ -459,6 +499,8 @@ export const printables = [
   { id: 'kartu-hewan', category: 'Bahasa', icon: '🐘', title: 'Kartu gambar: hewan', summary: 'Set tiga bagian dengan 36 hewan, dari hewan peliharaan sampai hewan liar.', how: 'Tiru suara hewannya sambil menyebut nama pada kartu.', pages: () => PictureSet({ items: ANIMAL_SET, name: 'hewan' }) },
   { id: 'kartu-benda-rumah', category: 'Bahasa', icon: '🏠', title: 'Kartu gambar: benda di rumah', summary: 'Set tiga bagian dengan 33 benda dan peralatan sehari-hari di rumah.', how: 'Setelah mencocokkan kartu, ajak anak mencari benda aslinya di rumah.', pages: () => PictureSet({ items: HOME_SET, name: 'benda di rumah' }) },
   { id: 'kartu-perasaan', category: 'Bahasa', icon: '😊', title: 'Kartu perasaan', summary: 'Dua belas kartu perasaan untuk membantu anak menamai apa yang ia rasakan.', how: 'Pakai saat ngobrol sebelum tidur: "Hari ini kamu merasa yang mana?"', pages: kartuPerasaan },
+  { id: 'angka-1-10', category: 'Matematika', icon: '🔟', title: 'Angka 1–10 (Indonesia)', summary: 'Sepuluh lembar, satu angka per lembar: jiplak, hitung, warnai, lingkari, dan tulis sendiri.', how: 'Satu lembar sehari sudah cukup. Mulai dari angka 1, dan lanjut kalau anak masih bersemangat. Dampingi saat menghitung: sentuh tiap benda sambil menyebut angkanya.', pages: () => angkaPages(1, 10) },
+  { id: 'angka-11-20', category: 'Matematika', icon: '🔢', title: 'Angka 11–20 (Indonesia)', summary: 'Sepuluh lembar dengan kotak sepuluh (ten frame): anak melihat bahwa 11 itu sepuluh ditambah satu.', how: 'Pakai setelah anak lancar angka 1–10. Tunjuk kotak sepuluh yang penuh, lalu hitung sisanya satu per satu.', pages: () => angkaPages(11, 20) },
 ]
 
 export const printableById = Object.fromEntries(printables.map((item) => [item.id, item]))
@@ -467,3 +509,11 @@ export const pageCount = (item) => item.pages().length
 export function PrintSheets({ item }) {
   return <div className="sheets">{item.pages().map((page, i) => React.cloneElement(page, { key: i }))}</div>
 }
+
+// Rentang usia (tahun) tiap lembar. Dipakai untuk mengelompokkan lembar per usia dan paket di toko.
+const AGES = { 'penjumlahan-tambah-satu': [5, 7], 'kartu-angka': [3, 6], 'jepit-jemuran-angka': [3, 5], 'hari-dan-bulan': [4, 7], 'cocokkan-bentuk': [2, 4], 'roda-warna': [3, 6], 'berburu-benda': [3, 6], 'empat-musim': [4, 7], 'hewan-dan-rumahnya': [3, 6], 'terapung-tenggelam': [4, 7], 'tumbuh-dari-biji': [4, 7], 'utuh-dan-potong': [2, 4], 'dari-mana-asalnya': [4, 6], 'menjahit-bentuk': [3, 5], 'menjiplak-huruf': [4, 6], 'kartu-huruf': [3, 6], 'kartu-makanan': [2, 5], 'kartu-hewan': [2, 5], 'kartu-benda-rumah': [2, 5], 'kartu-perasaan': [3, 7], 'angka-1-10': [3, 6], 'angka-11-20': [4, 7] }
+// Lembar yang gambarnya memakai emoji bawaan perangkat. Emoji milik vendor (Apple/Google) tidak boleh dijual ulang,
+// jadi lembar ini hanya gratis sampai gambarnya diganti foto atau ilustrasi berlisensi.
+const EMOJI_BASED = new Set(['dari-mana-asalnya', 'empat-musim', 'kartu-huruf', 'kartu-makanan', 'kartu-hewan', 'kartu-benda-rumah', 'kartu-perasaan', 'hewan-dan-rumahnya', 'terapung-tenggelam', 'tumbuh-dari-biji'])
+printables.forEach((item) => { item.ages = AGES[item.id]; item.sellable = !EMOJI_BASED.has(item.id) })
+export const printablesForAge = (min, max) => printables.filter((item) => item.ages[0] <= max && item.ages[1] >= min)

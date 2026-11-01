@@ -145,3 +145,13 @@ footer>span:nth-child(2){font-size:10.5px}
 .plan-sheet .paper-activity{break-inside:avoid}
 @media(max-width:600px){.sheet-list{grid-template-columns:1fr}}
 @media print{.plan-sheet .sheet-list li{font-size:10.5pt}}
+
+.shop-band{margin-top:44px}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px;margin:20px 0 22px}
+.shop-card{display:flex;flex-direction:column;gap:10px;background:#fffdf9;border:1px solid #eee9df;border-radius:8px;padding:14px;transition:transform .2s,box-shadow .2s}
+.shop-card:hover{transform:translateY(-3px);box-shadow:0 12px 28px #61553a12}
+.shop-card h3{font:18px 'DM Serif Display',serif;font-weight:400;margin:0}
+.shop-thumb{aspect-ratio:210/297;overflow:hidden;border-radius:4px;border:1px solid #e9e3d8;background:#fff;box-shadow:3px 3px 0 #efe9da}
+.shop-thumb .sheet{width:100%;height:100%;max-width:none;border:0;box-shadow:none}
+.shop-soon{display:inline-flex;align-items:center;min-height:46px;padding:0 20px;border-radius:6px;background:#eeeee4;color:#6e6559;font-size:12px;font-weight:600}
+@media print{.shop-page{display:none}}

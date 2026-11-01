@@ -4,13 +4,14 @@ import { ArrowDown, ArrowLeft, ArrowRight, Menu, Printer, X, Clock3, Heart, Leaf
 import logoHorizontal from './assets/logo/logo-horizontal.svg'
 import logoArch from './assets/logo/logo-arch.svg'
 import logoScene from './assets/logo/logo-scene.svg'
-import { printables, printableById, pageCount, PrintSheets } from './printables.jsx'
+import { printables, printableById, pageCount, PrintSheets, printablesForAge } from './printables.jsx'
 import { activities, activityBySlug } from './activities.js'
 import MontessoriPage, { Ref, SourceList } from './MontessoriPage.jsx'
 import { references } from './references.js'
 import { stages, stageBySlug, stageIncludes, stageForAge } from './stages.js'
 import ArticlePage from './ArticlePage.jsx'
 import { articleBySlug } from './articles.js'
+import ShopPage from './ShopPage.jsx'
 import PlaydatePage from './PlaydatePage.jsx'
 import './styles.css'
 
@@ -41,6 +42,7 @@ function parseRoute(hash) {
   if (hash === '#/montessori') return { page: 'montessori' }
   if (hash === '#/semua') return { page: 'semua' }
   if (hash === '#/rencana') return { page: 'rencana' }
+  if (hash === '#/worksheet') return { page: 'worksheet' }
   const m = hash.match(/^#\/(kategori|nilai|cetak|aktivitas|usia)\/([a-z0-9-]+)$/)
   if (!m) return { page: 'home' }
   if (m[1] === 'usia') return stageBySlug[m[2]] ? { page: 'usia', slug: m[2] } : { page: 'home' }
@@ -131,6 +133,7 @@ function AgePage({ stage, saved, onToggle }) {
           <div className="section-heading section-gap"><div><h2>{category}</h2></div><a className="text-link" href={`#/kategori/${slugify(category)}`}>Halaman kategori <ArrowRight size={14}/></a></div>
           <div className="activity-grid">{list.map((activity, index) => <ActivityCard key={activity.slug} activity={activity} index={index} saved={saved} onToggle={onToggle} />)}</div>
         </section>)}
+    {stage.range[0] < 7 && <section><div className="section-heading section-gap"><div><h2>Lembar worksheet untuk usia ini</h2><p>Siap cetak di kertas A4. Paket per usia ada di halaman worksheet.</p></div><a className="text-link" href="#/worksheet">Lihat paket worksheet <ArrowRight size={14}/></a></div><div className="printable-grid">{printablesForAge(0, 7).map((sheet) => <PrintableCard key={sheet.id} item={sheet} />)}</div></section>}
     <section><h2>Sumber</h2><SourceList ids={stage.refs} /></section>
   </main>
 }
@@ -350,13 +353,14 @@ function App() {
   if (route.page === 'memasak') page = <SubPage eyebrow="KOLEKSI" title="Memasak bersama anak" intro="Dapur adalah ruang belajar yang nyata: anak berhitung, menakar, mengikuti langkah, dan mencoba rasa baru. Pilih satu resep sederhana dan bagi tugas sesuai kemampuan anak." pointsTitle="SEBELUM MULAI" points={['Cuci tangan dengan sabun sebelum dan sesudah memasak, dan kenakan celemek.', 'Bagi tugas sesuai kemampuan: anak mencuci, mengaduk, menuang, dan menata. Kompor, oven, pisau tajam, dan blender hanya untuk orang dewasa.', 'Tanyakan lebih dulu soal alergi (telur, susu, gluten, kacang) pada anak yang ikut makan.', 'Madu tidak untuk anak di bawah 1 tahun.', 'Biarkan berantakan sedikit. Prosesnya lebih penting daripada hasilnya.']} items={activities.filter((item) => item.collections?.includes('memasak'))} sheets={['kartu-makanan', 'utuh-dan-potong'].map((id) => printableById[id])} saved={saved} onToggle={toggleSaved} />
   if (route.page === 'semua') page = <AllPage saved={saved} onToggle={toggleSaved} />
   if (route.page === 'aktivitas') page = <ActivityPage activity={activityBySlug[route.slug]} saved={saved} onToggle={toggleSaved} plan={plan} onTogglePlan={togglePlan} />
+  if (route.page === 'worksheet') page = <ShopPage />
   if (route.page === 'rencana') page = <PlanPrintPage plan={plan} />
   if (route.page === 'cetak') page = <PrintPage item={printableById[route.id]} />
   if (route.page === 'nilai') { const article = articleBySlug[route.slug]; page = <ArticlePage article={article}><section className="art-section"><div className="section-heading"><div><h2>Aktivitas untuk dicoba</h2><p>Ide yang sejalan dengan artikel ini.</p></div></div><div className="activity-grid">{article.related.map((slug, index) => <ActivityCard key={slug} activity={activityBySlug[slug]} index={index} saved={saved} onToggle={toggleSaved} />)}</div></section></ArticlePage> }
 
   return <>
     <header className="site-header"><a className="brand" href="#beranda"><img className="brand-logo" src={logoHorizontal} alt="Ruang Rasa" width="150" height="47" /></a>
-      <nav id="menu-utama" className={menuOpen ? 'open' : ''} aria-label="Menu utama"><a href="#aktivitas">Aktivitas</a><a href="#/semua" className="nav-extra">Semua ide</a><a href="#/montessori">Tentang Montessori</a><a href="#/playdate" className="nav-extra">Panduan playdate</a><a href="#printable">Checklist</a></nav>
+      <nav id="menu-utama" className={menuOpen ? 'open' : ''} aria-label="Menu utama"><a href="#aktivitas">Aktivitas</a><a href="#/semua" className="nav-extra">Semua ide</a><a href="#/montessori">Tentang Montessori</a><a href="#/playdate" className="nav-extra">Panduan playdate</a><a href="#printable">Checklist</a><a href="#/worksheet">Worksheet</a></nav>
       <div className="header-right"><a className="header-cta" href="#aktivitas">Temukan ide <ArrowRight size={15}/></a><button type="button" className="menu-toggle" aria-label={menuOpen ? 'Tutup menu' : 'Buka menu'} aria-expanded={menuOpen} aria-controls="menu-utama" onClick={() => setMenuOpen((value) => !value)}>{menuOpen ? <X size={20}/> : <Menu size={20}/>}</button></div>
     </header>
 

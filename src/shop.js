@@ -3,6 +3,11 @@
 // Selama kosong, tombol pesan tampil sebagai "Segera dijual" dan harga tidak ditampilkan.
 export const SHOP = {
   orderUrl: '',
+  // Tautan halaman donasi atau bayar seikhlasnya (Trakteer, Saweria, Ko-fi, dan sejenisnya).
+  donateUrl: '',
+  suggestedDonations: [10000, 25000, 50000],
+  // Paket seikhlasnya: lembar yang bisa didapat dengan membayar sesuai kemampuan.
+  donationIds: ['angka-1-10', 'huruf-a-z', 'mewarnai'],
   prices: {},
   bands: [
     { slug: 'usia-2-3', label: '2–3 tahun', min: 2, max: 3, blurb: 'Mencocokkan, memilih, dan memegang pensil untuk pertama kali.' },

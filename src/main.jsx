@@ -204,15 +204,18 @@ function PlanPrintPage({ plan }) {
 
 function PrintPage({ item }) {
   const back = `#/kategori/${slugify(item.category)}`
+  const full = item.free || window.__RR_FULL === true
   return <main className="printpage section-wrap">
-    <style>{'@page{size:A4;margin:0}'}</style>
+    <style>{full ? '@page{size:A4;margin:0}' : '@media print{.printpage{display:none}}'}</style>
     <div className="print-toolbar">
       <a className="back-link" href={back}><ArrowLeft size={15}/> {item.category}</a>
-      <div className="eyebrow">LEMBAR PRINTABLE · {item.category.toUpperCase()}</div><h1>{item.title}</h1><p className="subpage-intro">{item.summary}</p>
+      <div className="eyebrow">{full ? 'LEMBAR PRINTABLE' : 'CONTOH LEMBAR'} · {item.category.toUpperCase()}</div><h1>{item.title}</h1><p className="subpage-intro">{item.summary}</p>
       <p className="print-how"><strong>Cara memakai:</strong> {item.how}</p>
-      <div className="print-actions"><PrintButton label={`Cetak ${pageCount(item)} halaman`} /><span>Ukuran kertas A4. Di jendela cetak, atur skala ke 100% (jangan "fit to page") agar ukurannya pas.</span></div>
+      {full
+        ? <div className="print-actions"><PrintButton label={`Cetak ${pageCount(item)} halaman`} /><span>Ukuran kertas A4. Di jendela cetak, atur skala ke 100% (jangan "fit to page") agar ukurannya pas.</span></div>
+        : <div className="print-actions"><a className="button-primary" href="#/worksheet">Lihat paket worksheet <ArrowRight size={16}/></a><span>Ini contoh halaman pertama dari {pageCount(item)} halaman. Versi lengkap tersedia di paket worksheet.</span></div>}
     </div>
-    <PrintSheets item={item} />
+    <div className={full ? '' : 'sheet-preview'}><PrintSheets item={item} limit={full ? undefined : 1} /></div>
   </main>
 }
 

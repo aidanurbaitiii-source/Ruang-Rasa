@@ -155,3 +155,17 @@ footer>span:nth-child(2){font-size:10.5px}
 .shop-thumb .sheet{width:100%;height:100%;max-width:none;border:0;box-shadow:none}
 .shop-soon{display:inline-flex;align-items:center;min-height:46px;padding:0 20px;border-radius:6px;background:#eeeee4;color:#6e6559;font-size:12px;font-weight:600}
 @media print{.shop-page{display:none}}
+
+.sheet-preview{position:relative}
+.sheet-preview:after{content:'CONTOH';position:absolute;inset:0;display:grid;place-items:center;font:700 clamp(60px,16vw,150px)/1 'DM Sans',sans-serif;letter-spacing:6px;color:#43392f14;transform:rotate(-24deg);pointer-events:none}
+.bundle-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:32px 0 18px}
+.bundle-card{display:flex;flex-direction:column;gap:10px;background:#fffdf9;border:1px solid #e9e3d8;border-radius:10px;padding:22px}
+.bundle-card h2{font:26px 'DM Serif Display',serif;font-weight:400;margin:0}
+.bundle-card p{font-size:13px;line-height:1.7;color:#6e6559;margin:0}
+.bundle-tag{align-self:flex-start;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:#536d54;background:#e5e9dc;border-radius:99px;padding:5px 10px}
+.bundle-meta{font-size:12px;color:#8b806f}
+.bundle-actions{margin-top:auto;padding-top:8px;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.bundle-actions small{font-size:11px;color:#8b806f}
+.bundle-actions .button-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 20px}
+.shop-age{margin-top:30px}.shop-age-title{font:22px 'DM Serif Display',serif;font-weight:400;margin:0}
+@media(max-width:800px){.bundle-row{grid-template-columns:1fr}}

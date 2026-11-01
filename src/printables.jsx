@@ -478,6 +478,164 @@ function angkaPages(from, to) {
   })
 }
 
+// ---------- Paket huruf (dijual): satu lembar untuk tiap huruf ----------
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+
+function hurufPages() {
+  return ALPHABET.map((L, idx) => {
+    const l = L.toLowerCase(), color = PALETTE[idx % 6]
+    let seed = (idx + 1) * 7919
+    const rand = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648 }
+    const others = ALPHABET.filter((x) => x !== L)
+    const target = new Set(); while (target.size < 8) target.add(Math.floor(rand() * 36))
+    const grid = Array.from({ length: 36 }, (_, i) => { const t = target.has(i); const ch = t ? L : others[Math.floor(rand() * 25)]; return { ch: rand() < .5 ? ch : ch.toLowerCase(), t } })
+    // pastikan huruf target tampil dalam dua bentuk (besar dan kecil)
+    const marks = grid.filter((g) => g.t); marks.forEach((g, i) => { g.ch = i % 2 ? l : L })
+    const font = { fontFamily: "'Nunito','Trebuchet MS',sans-serif", fontWeight: 700 }
+    return <Page key={L} title={`Huruf ${L}${l}`} lines={[`Ini huruf ${L} besar dan ${l} kecil. Jiplak, cari, lalu tulis sendiri.`]}>
+      <rect x="12" y="44" width="186" height="62" rx="4" fill="#faf6ec" stroke="#e1dacd" strokeWidth=".4" />
+      <text x="60" y="94" textAnchor="middle" fontSize="58" style={{ ...font, fill: color }}>{L}</text>
+      <text x="120" y="94" textAnchor="middle" fontSize="58" style={{ ...font, fill: color }}>{l}</text>
+      <text x="12" y="117" className="s-label">1. Jiplak hurufnya</text>
+      {[[L, 140], [l, 166]].map(([ch, y], row) => <g key={row}>
+        <line x1="12" y1={y} x2="198" y2={y} stroke="#cfc9b5" strokeWidth=".4" />
+        <line x1="12" y1={y - 15} x2="198" y2={y - 15} stroke="#e8e3d3" strokeWidth=".4" strokeDasharray="1.5 1.5" />
+        {[0, 1, 2, 3, 4].map((i) => <text key={i} x={14 + i * 37} y={y - 1.5} className={i === 0 ? 's-trace-solid' : 's-trace'}>{ch}</text>)}
+      </g>)}
+      <text x="12" y="182" className="s-label">2. Cari dan lingkari huruf {L} atau {l}</text>
+      {grid.map((g, i) => <text key={i} x={22 + (i % 9) * 20.5} y={197 + Math.floor(i / 9) * 14} textAnchor="middle" fontSize="8.5" style={font}>{g.ch}</text>)}
+      <text x="12" y="260" className="s-label">3. Tulis sendiri</text>
+      {Array.from({ length: 8 }, (_, i) => <rect key={i} x={12 + i * 23.2} y="264" width="19" height="19" fill="#fff" stroke={OLIVE} strokeWidth=".4" />)}
+    </Page>
+  })
+}
+
+// ---------- Mewarnai (dijual): gambar garis sederhana ----------
+const OUT = { fill: 'none', stroke: INK, strokeWidth: 1.1, strokeLinejoin: 'round', strokeLinecap: 'round' }
+const ring = (cx, cy, r, n, draw) => Array.from({ length: n }, (_, i) => <g key={i} transform={`rotate(${(360 / n) * i} ${cx} ${cy})`}>{draw(i)}</g>)
+
+const COLORING = {
+  bunga: () => <g {...OUT}>
+    {ring(105, 120, 0, 8, (i) => <ellipse key={i} cx="105" cy="82" rx="14" ry="26" />)}
+    <circle cx="105" cy="120" r="17" /><circle cx="105" cy="120" r="8" />
+    <path d="M105 140 C100 190 110 230 105 268" /><path d="M105 205 C80 190 62 196 54 212 C78 222 96 216 105 205 Z" /><path d="M105 232 C130 214 150 220 158 236 C134 246 114 242 105 232 Z" />
+    <path d="M30 270 H180" />{[40, 70, 140, 165].map((x) => <path key={x} d={`M${x} 270 l-3 -9 M${x} 270 l3 -10`} />)}
+  </g>,
+  rumah: () => <g {...OUT}>
+    <rect x="50" y="140" width="110" height="100" /><path d="M40 142 L105 80 L170 142 Z" /><rect x="132" y="88" width="14" height="30" />
+    <rect x="92" y="180" width="26" height="60" /><circle cx="112" cy="212" r="1.8" />
+    <rect x="62" y="158" width="24" height="24" /><path d="M74 158 V182 M62 170 H86" /><rect x="124" y="158" width="24" height="24" /><path d="M136 158 V182 M124 170 H148" />
+    <circle cx="176" cy="62" r="16" />{ring(176, 62, 0, 10, () => <path d="M176 38 v-8" />)}
+    <path d="M24 100 q8 -14 22 -8 q8 -12 22 -2 q12 0 10 12 H24 Z" />
+    <path d="M20 240 H190" />{[30, 60, 150, 178].map((x) => <path key={x} d={`M${x} 240 l-3 -10 M${x} 240 l3 -9`} />)}
+  </g>,
+  pohon: () => <g {...OUT}>
+    <path d="M92 270 L96 170 H114 L118 270" /><path d="M96 200 L72 176 M112 190 L134 166" />
+    <path d="M62 178 C30 176 28 138 54 128 C44 98 78 72 100 84 C116 66 150 74 154 100 C182 104 186 150 156 160 C150 182 118 188 106 176 C94 186 70 188 62 178 Z" />
+    {[[86, 118], [126, 108], [104, 150], [66, 148], [146, 136]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="6" />)}
+    <path d="M20 270 H190" />
+    <path d="M160 52 q6 -8 12 0 q6 -8 12 0" /><path d="M36 60 q5 -7 10 0 q5 -7 10 0" />
+  </g>,
+  ikan: () => <g {...OUT} transform="translate(-12 12)">
+    <path d="M40 140 C70 80 140 80 164 140 C140 200 70 200 40 140 Z" /><path d="M164 140 L204 104 V176 Z" />
+    <circle cx="76" cy="128" r="7" /><circle cx="76" cy="128" r="2.4" /><path d="M52 150 q8 6 16 2" />
+    <path d="M100 92 C106 66 130 66 134 92" /><path d="M104 188 C108 206 126 206 130 188" />
+    {[[96, 140], [114, 124], [132, 140], [114, 156]].map(([x, y], i) => <path key={i} d={`M${x - 8} ${y} q8 -10 16 0 q-8 10 -16 0`} />)}
+    {[[40, 70, 6], [58, 56, 9], [32, 50, 4]].map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} />)}
+    <path d="M30 270 C50 230 60 240 56 214 M56 270 C74 240 84 252 80 226" /><path d="M20 38 q10 -8 20 0 q10 8 20 0 q10 -8 20 0 q10 8 20 0 q10 -8 20 0 q10 8 20 0 q10 -8 20 0" />
+  </g>,
+  kupu: () => <g {...OUT}>
+    <path d="M105 140 C70 50 20 70 30 130 C36 168 80 160 105 140 Z" /><path d="M105 140 C140 50 190 70 180 130 C174 168 130 160 105 140 Z" />
+    <path d="M105 150 C70 160 40 200 62 232 C86 250 100 196 105 150 Z" /><path d="M105 150 C140 160 170 200 148 232 C124 250 110 196 105 150 Z" />
+    <ellipse cx="105" cy="170" rx="7" ry="52" /><circle cx="105" cy="108" r="9" /><path d="M101 100 C96 80 86 72 78 72 M109 100 C114 80 124 72 132 72" />
+    {[[62, 100, 12], [150, 100, 12], [60, 205, 8], [150, 205, 8]].map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} />)}
+    {[[52, 128, 5], [158, 128, 5]].map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} />)}
+  </g>,
+  mobil: () => <g {...OUT}>
+    <path d="M20 190 V160 Q20 148 34 146 L62 140 L82 106 Q86 100 94 100 H138 Q146 100 150 106 L170 140 L190 146 Q202 150 202 160 V190 Z" />
+    <path d="M70 140 L88 112 H108 V140 Z" /><path d="M118 112 H136 L152 140 H118 Z" />
+    <circle cx="64" cy="192" r="22" /><circle cx="64" cy="192" r="9" /><circle cx="160" cy="192" r="22" /><circle cx="160" cy="192" r="9" />
+    <circle cx="30" cy="166" r="5" /><circle cx="194" cy="166" r="5" />
+    <path d="M10 222 H210" /><path d="M20 250 H50 M80 250 H110 M140 250 H170" />
+    <path d="M30 60 q8 -14 22 -8 q8 -12 22 -2 q12 0 10 12 Z" /><path d="M140 50 q8 -14 22 -8 q8 -12 22 -2 q12 0 10 12 Z" />
+  </g>,
+  balon: () => <g {...OUT}>
+    {[[60, 100, 30, 38], [105, 78, 32, 40], [150, 104, 30, 38], [82, 168, 28, 36], [130, 170, 28, 36]].map(([x, y, rx, ry], i) => <g key={i}>
+      <ellipse cx={x} cy={y} rx={rx} ry={ry} /><path d={`M${x - 5} ${y + ry + 8} L${x} ${y + ry} L${x + 5} ${y + ry + 8} Z`} /><path d={`M${x} ${y + ry + 8} q-8 20 4 36 q8 14 -2 30`} /><path d={`M${x - rx * .5} ${y - ry * .3} q4 -14 14 -16`} />
+    </g>)}
+    <polygon points={pts(starPoints(36, 50, 9, 4))} /><polygon points={pts(starPoints(176, 56, 10, 4.5))} />
+  </g>,
+  pelangi: () => <g {...OUT}>
+    {[104, 88, 72, 56, 40, 24].map((r) => <path key={r} d={`M${105 - r} 200 A${r} ${r} 0 0 1 ${105 + r} 200`} />)}
+    <path d="M1 200 H105" transform="translate(0 0)" />
+    <path d="M30 206 q-14 0 -14 14 q0 12 14 12 H80 q14 0 14 -12 q0 -12 -14 -14 q-4 -12 -20 -8 q-14 -4 -30 8 Z" /><path d="M130 206 q-14 0 -14 14 q0 12 14 12 H180 q14 0 14 -12 q0 -12 -14 -14 q-4 -12 -20 -8 q-14 -4 -30 8 Z" />
+    <circle cx="176" cy="68" r="20" />{ring(176, 68, 0, 12, () => <path d="M176 40 v-10" />)}
+    <path d="M30 262 q6 -12 12 0 q6 -12 12 0 M150 258 q5 -10 10 0 q5 -10 10 0" />
+  </g>,
+}
+const COLORING_TITLES = { bunga: 'Bunga', rumah: 'Rumah', pohon: 'Pohon apel', ikan: 'Ikan di laut', kupu: 'Kupu-kupu', mobil: 'Mobil', balon: 'Balon udara', pelangi: 'Pelangi' }
+
+const mandala = (n, variant) => <g {...OUT} strokeWidth="0.9">
+  {[96, 84, 64, 40, 18].map((r) => <circle key={r} cx="105" cy="160" r={r} />)}
+  {ring(105, 160, 0, n, (i) => variant === 0 ? <ellipse cx="105" cy="94" rx="9" ry="16" /> : variant === 1 ? <path d="M105 64 L116 90 L105 106 L94 90 Z" /> : <circle cx="105" cy="92" r="9" />)}
+  {ring(105, 160, 0, n, () => <path d="M105 140 V122" />)}
+  {ring(105, 160, 0, n * 2, () => <circle cx="105" cy="80" r="3.2" />)}
+  <polygon points={pts(polygon(105, 160, 28, n, -90))} />
+</g>
+
+function mewarnaiPages() {
+  return [...Object.keys(COLORING).map((key) => <Page key={key} title={`Mewarnai: ${COLORING_TITLES[key]}`} lines={['Warnai sesuka hati. Tidak ada warna yang salah.']}>{COLORING[key]()}</Page>),
+    ...[[8, 0, 'Mandala bunga'], [10, 1, 'Mandala berlian'], [12, 2, 'Mandala bulatan']].map(([n, v, t]) => <Page key={t} title={`Mewarnai: ${t}`} lines={['Mulai dari tengah, lalu warnai ke luar. Pakai warna favorit anak.']}>{mandala(n, v)}</Page>)]
+}
+
+// ---------- Gunting dan kolase (dijual) ----------
+const spiral = (cx, cy, turns, gap) => { const out = []; for (let t = 0; t <= turns * 2 * Math.PI; t += .15) { const r = gap * t / (2 * Math.PI); out.push([cx + r * Math.cos(t), cy + r * Math.sin(t)]) } return pts(out) }
+const waveD = (x0, x1, y, amp, len) => { let d = `M${x0} ${y}`; for (let x = x0; x < x1; x += len) d += ` q${len / 4} ${-amp} ${len / 2} 0 q${len / 4} ${amp} ${len / 2} 0`; return d }
+const zigzag = (x0, x1, y, amp, step) => { const out = []; let up = true; for (let x = x0; x <= x1; x += step) { out.push([x, y + (up ? -amp : amp)]); up = !up } return pts(out) }
+const CUT = { fill: 'none', stroke: '#6b694b', strokeWidth: .7, strokeDasharray: '2.2 1.6', strokeLinecap: 'round', strokeLinejoin: 'round' }
+const Marks = ({ x1, x2, y }) => <g><circle cx={x1} cy={y} r="2.2" fill="#6fa86b" /><polygon points={pts(starPoints(x2, y, 3.4, 1.5))} fill="#f2a33a" /></g>
+
+function guntingPages() {
+  const head = (text) => [`${text} Mulai dari titik hijau, selesai di bintang oranye.`]
+  return [
+    <Page key="lurus" title="Gunting: garis lurus" lines={head('Gunting mengikuti garis putus-putus.')}>{Array.from({ length: 8 }, (_, i) => { const y = 56 + i * 30; return <g key={i}><line x1="22" y1={y} x2="188" y2={y} {...CUT} /><Marks x1={16} x2={194} y={y} /></g> })}</Page>,
+    <Page key="zigzag" title="Gunting: zigzag" lines={head('Gunting dengan gerakan naik turun.')}>{Array.from({ length: 6 }, (_, i) => { const y = 66 + i * 38, amp = 5 + (i % 3) * 3; return <g key={i}><polyline points={zigzag(22, 188, y, amp, 166 / (8 + i * 2))} {...CUT} /><Marks x1={16} x2={194} y={y} /></g> })}</Page>,
+    <Page key="gelombang" title="Gunting: gelombang" lines={head('Gunting garis melengkung perlahan.')}>{Array.from({ length: 6 }, (_, i) => { const y = 66 + i * 38; return <g key={i}><path d={waveD(22, 188, y, 6 + (i % 3) * 3, 166 / (4 + i))} {...CUT} /><Marks x1={16} x2={194} y={y} /></g> })}</Page>,
+    <Page key="bulat" title="Gunting: lingkaran dan spiral" lines={['Gunting mengikuti garis. Untuk spiral, mulai dari tepi luar dan gunting sampai ke tengah.']}>
+      <circle cx="58" cy="84" r="30" {...CUT} /><circle cx="152" cy="84" r="30" {...CUT} />
+      <polygon points={pts(polygon(58, 168, 30, 3))} {...CUT} /><rect x="122" y="140" width="60" height="56" {...CUT} />
+      <polyline points={spiral(105, 244, 4.5, 6.5)} {...CUT} /><text x="150" y="222" className="s-label">spiral: gunting sampai ke tengah</text>
+    </Page>,
+  ]
+}
+
+const PIECE = (x, y, w, h, fill, label, round = 0) => <g key={`${x}-${y}`}><rect x={x} y={y} width={w} height={h} rx={round} fill={fill} stroke="#6b694b" strokeWidth=".6" strokeDasharray="2 1.6" />{label && <text x={x + w / 2} y={y + h + 4.5} className="s-label" textAnchor="middle">{label}</text>}</g>
+const GHOST = { fill: 'none', stroke: '#b9b49c', strokeWidth: .7, strokeDasharray: '1.6 1.6' }
+
+function kolasePages() {
+  return [
+    <Page key="rumah-1" title="Kolase: rumah (tempel di sini)" lines={['Gunting bentuk di lembar berikutnya, lalu tempel pada bayangan yang sama.']}>
+      <rect x="55" y="140" width="100" height="100" {...GHOST} /><polygon points="45,142 105,84 165,142" {...GHOST} /><rect x="95" y="190" width="24" height="50" {...GHOST} /><rect x="66" y="156" width="22" height="22" {...GHOST} /><rect x="126" y="156" width="22" height="22" {...GHOST} /><circle cx="170" cy="70" r="16" {...GHOST} />
+      <path d="M20 240 H190" stroke="#b9b49c" strokeWidth=".7" />
+    </Page>,
+    <Page key="rumah-2" name={false} title="Kolase: rumah (potongan)" lines={['Gunting di sepanjang garis putus-putus. Warnai dulu kalau mau.']}>
+      {PIECE(20, 50, 100, 100, '#f2c230', 'dinding')}
+      <polygon points="140,50 200,50 170,100" fill="#d9544d" stroke="#6b694b" strokeWidth=".6" strokeDasharray="2 1.6" /><text x="170" y="108" className="s-label" textAnchor="middle">atap (gunting segitiganya)</text>
+      {PIECE(20, 172, 24, 50, '#8e6bb8', 'pintu')}{PIECE(60, 172, 22, 22, '#3b7dd8', 'jendela')}{PIECE(96, 172, 22, 22, '#3b7dd8', 'jendela')}
+      <circle cx="160" cy="190" r="16" fill="#f2a33a" stroke="#6b694b" strokeWidth=".6" strokeDasharray="2 1.6" /><text x="160" y="212" className="s-label" textAnchor="middle">matahari</text>
+    </Page>,
+    <Page key="robot-1" title="Kolase: robot (tempel di sini)" lines={['Gunting potongan robot di lembar berikutnya, lalu tempel pada bayangan yang sama.']}>
+      <rect x="80" y="62" width="50" height="44" {...GHOST} /><rect x="70" y="112" width="70" height="70" {...GHOST} /><rect x="40" y="116" width="26" height="12" {...GHOST} /><rect x="144" y="116" width="26" height="12" {...GHOST} /><rect x="78" y="186" width="20" height="46" {...GHOST} /><rect x="112" y="186" width="20" height="46" {...GHOST} />
+      <circle cx="94" cy="80" r="6" {...GHOST} /><circle cx="116" cy="80" r="6" {...GHOST} /><rect x="94" y="94" width="22" height="6" {...GHOST} /><line x1="105" y1="62" x2="105" y2="48" {...GHOST} /><circle cx="105" cy="44" r="4" {...GHOST} />
+    </Page>,
+    <Page key="robot-2" name={false} title="Kolase: robot (potongan)" lines={['Gunting di sepanjang garis putus-putus. Warnai dulu kalau mau.']}>
+      {PIECE(20, 50, 50, 44, '#3b7dd8', 'kepala')}{PIECE(84, 50, 70, 70, '#d9544d', 'badan')}{PIECE(20, 112, 26, 12, '#f2a33a', 'tangan')}{PIECE(54, 112, 26, 12, '#f2a33a', 'tangan')}{PIECE(20, 150, 20, 46, '#6fa86b', 'kaki')}{PIECE(50, 150, 20, 46, '#6fa86b', 'kaki')}
+      <circle cx="100" cy="160" r="6" fill="#f2c230" stroke="#6b694b" strokeWidth=".6" strokeDasharray="2 1.6" /><circle cx="120" cy="160" r="6" fill="#f2c230" stroke="#6b694b" strokeWidth=".6" strokeDasharray="2 1.6" /><text x="110" y="174" className="s-label" textAnchor="middle">mata</text>
+      {PIECE(136, 154, 22, 6, '#8e6bb8', 'mulut')}{PIECE(170, 150, 4, 14, '#6b694b', 'antena')}<circle cx="186" cy="157" r="4" fill="#d9544d" stroke="#6b694b" strokeWidth=".6" strokeDasharray="2 1.6" />
+    </Page>,
+  ]
+}
+
 export const printables = [
   { id: 'penjumlahan-tambah-satu', category: 'Matematika', icon: '➕', title: 'Menambah satu', summary: 'Hitung bulatan, tambah satu, tulis jawabannya. Ada lembar koreksi untuk mengecek sendiri.', how: 'Cetak lembar pertama untuk anak dan simpan lembar koreksi untuk orang dewasa. Mulai dari baris pertama dan berhenti kapan pun anak lelah.', pages: penjumlahan },
   { id: 'kartu-angka', category: 'Matematika', icon: '🔢', title: 'Kartu angka 1–20', summary: 'Kartu angka dengan tulisan namanya, ditambah simbol + − =.', how: 'Gunting kartunya. Tunjukkan satu per satu, atau susun berurutan bersama anak.', pages: kartuAngka },
@@ -501,19 +659,25 @@ export const printables = [
   { id: 'kartu-perasaan', category: 'Bahasa', icon: '😊', title: 'Kartu perasaan', summary: 'Dua belas kartu perasaan untuk membantu anak menamai apa yang ia rasakan.', how: 'Pakai saat ngobrol sebelum tidur: "Hari ini kamu merasa yang mana?"', pages: kartuPerasaan },
   { id: 'angka-1-10', category: 'Matematika', icon: '🔟', title: 'Angka 1–10 (Indonesia)', summary: 'Sepuluh lembar, satu angka per lembar: jiplak, hitung, warnai, lingkari, dan tulis sendiri.', how: 'Satu lembar sehari sudah cukup. Mulai dari angka 1, dan lanjut kalau anak masih bersemangat. Dampingi saat menghitung: sentuh tiap benda sambil menyebut angkanya.', pages: () => angkaPages(1, 10) },
   { id: 'angka-11-20', category: 'Matematika', icon: '🔢', title: 'Angka 11–20 (Indonesia)', summary: 'Sepuluh lembar dengan kotak sepuluh (ten frame): anak melihat bahwa 11 itu sepuluh ditambah satu.', how: 'Pakai setelah anak lancar angka 1–10. Tunjuk kotak sepuluh yang penuh, lalu hitung sisanya satu per satu.', pages: () => angkaPages(11, 20) },
+  { id: 'huruf-a-z', category: 'Bahasa', icon: '🔠', title: 'Huruf A–Z (satu huruf per lembar)', summary: 'Dua puluh enam lembar: jiplak huruf besar dan kecil, cari dan lingkari huruf di antara huruf lain, lalu tulis sendiri.', how: 'Mulai dari huruf di nama anak. Satu lembar sehari, dan ucapkan bunyi hurufnya sambil menjiplak, bukan hanya namanya.', pages: () => hurufPages() },
+  { id: 'mewarnai', category: 'Sensorial', icon: '🖍️', title: 'Mewarnai: gambar dan mandala', summary: 'Delapan gambar garis sederhana (bunga, rumah, pohon, ikan, kupu-kupu, mobil, balon, pelangi) dan tiga mandala.', how: 'Sediakan krayon atau pensil warna dan biarkan anak memilih warnanya. Mandala cocok untuk anak yang sudah lebih tenang memegang krayon.', pages: () => mewarnaiPages() },
+  { id: 'gunting-latihan', category: 'Kehidupan praktis', icon: '✂️', title: 'Latihan menggunting', summary: 'Empat lembar: garis lurus, zigzag, gelombang, serta lingkaran dan spiral, dari mudah ke sulit.', how: 'Pakai gunting anak yang ujungnya tumpul dan dampingi anak. Mulai dari garis lurus dan naik tingkat kalau anak sudah lancar.', pages: () => guntingPages() },
+  { id: 'kolase-bentuk', category: 'Kehidupan praktis', icon: '🏠', title: 'Kolase bentuk: rumah dan robot', summary: 'Dua kolase: gunting potongan bentuk lalu tempel pada bayangannya untuk menyusun rumah dan robot (4 halaman).', how: 'Warnai potongan lebih dulu kalau mau. Beri anak lem stik dan biarkan ia menebak letak tiap potongan sebelum menempel.', pages: () => kolasePages() },
 ]
 
 export const printableById = Object.fromEntries(printables.map((item) => [item.id, item]))
 export const pageCount = (item) => item.pages().length
 
-export function PrintSheets({ item }) {
-  return <div className="sheets">{item.pages().map((page, i) => React.cloneElement(page, { key: i }))}</div>
+export function PrintSheets({ item, limit }) {
+  return <div className="sheets">{item.pages().slice(0, limit).map((page, i) => React.cloneElement(page, { key: i }))}</div>
 }
 
 // Rentang usia (tahun) tiap lembar. Dipakai untuk mengelompokkan lembar per usia dan paket di toko.
-const AGES = { 'penjumlahan-tambah-satu': [5, 7], 'kartu-angka': [3, 6], 'jepit-jemuran-angka': [3, 5], 'hari-dan-bulan': [4, 7], 'cocokkan-bentuk': [2, 4], 'roda-warna': [3, 6], 'berburu-benda': [3, 6], 'empat-musim': [4, 7], 'hewan-dan-rumahnya': [3, 6], 'terapung-tenggelam': [4, 7], 'tumbuh-dari-biji': [4, 7], 'utuh-dan-potong': [2, 4], 'dari-mana-asalnya': [4, 6], 'menjahit-bentuk': [3, 5], 'menjiplak-huruf': [4, 6], 'kartu-huruf': [3, 6], 'kartu-makanan': [2, 5], 'kartu-hewan': [2, 5], 'kartu-benda-rumah': [2, 5], 'kartu-perasaan': [3, 7], 'angka-1-10': [3, 6], 'angka-11-20': [4, 7] }
+const AGES = { 'penjumlahan-tambah-satu': [5, 7], 'kartu-angka': [3, 6], 'jepit-jemuran-angka': [3, 5], 'hari-dan-bulan': [4, 7], 'cocokkan-bentuk': [2, 4], 'roda-warna': [3, 6], 'berburu-benda': [3, 6], 'empat-musim': [4, 7], 'hewan-dan-rumahnya': [3, 6], 'terapung-tenggelam': [4, 7], 'tumbuh-dari-biji': [4, 7], 'utuh-dan-potong': [2, 4], 'dari-mana-asalnya': [4, 6], 'menjahit-bentuk': [3, 5], 'menjiplak-huruf': [4, 6], 'kartu-huruf': [3, 6], 'kartu-makanan': [2, 5], 'kartu-hewan': [2, 5], 'kartu-benda-rumah': [2, 5], 'kartu-perasaan': [3, 7], 'angka-1-10': [3, 6], 'angka-11-20': [4, 7], 'huruf-a-z': [4, 6], 'mewarnai': [2, 6], 'gunting-latihan': [3, 5], 'kolase-bentuk': [3, 6] }
 // Lembar yang gambarnya memakai emoji bawaan perangkat. Emoji milik vendor (Apple/Google) tidak boleh dijual ulang,
 // jadi lembar ini hanya gratis sampai gambarnya diganti foto atau ilustrasi berlisensi.
 const EMOJI_BASED = new Set(['dari-mana-asalnya', 'empat-musim', 'kartu-huruf', 'kartu-makanan', 'kartu-hewan', 'kartu-benda-rumah', 'kartu-perasaan', 'hewan-dan-rumahnya', 'terapung-tenggelam', 'tumbuh-dari-biji'])
-printables.forEach((item) => { item.ages = AGES[item.id]; item.sellable = !EMOJI_BASED.has(item.id) })
+// Lembar yang boleh dicetak penuh langsung di website. Lembar lain yang dijual hanya menampilkan contoh halaman pertama.
+export const FREE_IDS = new Set(['cocokkan-bentuk', 'menjahit-bentuk', 'gunting-latihan'])
+printables.forEach((item) => { item.ages = AGES[item.id]; item.sellable = !EMOJI_BASED.has(item.id); item.free = !item.sellable || FREE_IDS.has(item.id) })
 export const printablesForAge = (min, max) => printables.filter((item) => item.ages[0] <= max && item.ages[1] >= min)
